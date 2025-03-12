@@ -22,9 +22,9 @@ out vec4 frag_color;
 
 
 // Uniforms for color mixing (color transformation matrix columns)
-uniform vec4 red;   // Transformation for red channel
-uniform vec4 green; // Transformation for green channel
-uniform vec4 blue;  // Transformation for blue channel
+uniform vec4 red=vec4(1.,0.,0.,0.);   // Transformation for red channel
+uniform vec4 green=vec4(0.,1.,0.,0.); ; // Transformation for green channel
+uniform vec4 blue=vec4(0.,0.,1.,0.); ;  // Transformation for blue channel
 
 
 void main(){

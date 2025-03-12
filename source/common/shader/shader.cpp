@@ -29,14 +29,14 @@ bool our::ShaderProgram::attach(const std::string &filename, GLenum type) const 
     GLuint shader = glCreateShader(type);
     glShaderSource(shader, 1, &sourceCStr, nullptr);
     glCompileShader(shader);
-    glAttachShader(program, shader);
     error = checkForShaderCompilationErrors(shader);
     if (!error.empty()) {
         std::cerr << "ERROR: Couldn't compile shader: " << filename << std::endl;
         std::cerr << error << std::endl;
         return false;
     }
-
+    glAttachShader(program, shader);
+    glDeleteShader(shader);
     //We return true if the compilation succeeded
     return true;
 }
