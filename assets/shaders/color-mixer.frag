@@ -20,6 +20,20 @@ out vec4 frag_color;
 
 //TODO: (Req 1) Finish this shader and apply the channel mixing using the "dot" function.
 
+
+// Uniforms for color mixing (color transformation matrix columns)
+uniform vec4 red;   // Transformation for red channel
+uniform vec4 green; // Transformation for green channel
+uniform vec4 blue;  // Transformation for blue channel
+
+
 void main(){
-    frag_color = fs_in.color;
+    vec4 input_color = vec4(fs_in.color, 1.0);
+
+    // Apply the color mixing using dot products
+    frag_color.r = dot(red, input_color);
+    frag_color.g = dot(green, input_color);
+    frag_color.b = dot(blue, input_color);
+    // The alpha channel remains the same
+    frag_color.a = 1.0;
 }
