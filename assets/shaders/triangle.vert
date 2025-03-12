@@ -1,9 +1,9 @@
 #version 330
 
 // This vertex shader should be used to render a triangle whose normalized device coordinates are:
-// (-0.5, -0.5, 0.0), ( 0.5, -0.5, 0.0), ( 0.0,  0.5, 0.0)
+// (-0.5, -0.5, 0.0), ( 0.5, -0.5, 0.0), ( 0.0,  0.5, 0.0) //done
 // And it also should send the vertex color as a varying to the fragment shader where the colors are (in order):
-// (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0)
+// (1.0, 0.0, 0.0), (0.0, 1.0, 0.0), (0.0, 0.0, 1.0) //done
 
 out Varyings {
     vec3 color;
@@ -16,5 +16,32 @@ out Varyings {
 
 //TODO: (Req 1) Finish this shader
 
+
+// Uniform variables for translation and scaling transformations
+uniform vec2 translation = vec2(0.0, 0.0);
+uniform vec2 scale = vec2(1.0, 1.0);
+// Define vertex colors corresponding to the three triangle vertices
+const vec3 colors[3] = vec3[3](
+    vec3(1.0, 0.0, 0.0), // Red
+    vec3(0.0, 1.0, 0.0), // Green
+    vec3(0.0, 0.0, 1.0)  // Blue
+);
+
+const vec3 vertices[3] = vec3[3](
+    vec3(-0.5, -0.5, 0.0),
+    vec3( 0.5, -0.5, 0.0),
+    vec3( 0.0,  0.5, 0.0)
+);
+
+
+
 void main(){
+    // Apply transformation: scale * position + translation
+    vec2 transformedPos = scale * vertices[gl_VertexID].xy + translation;
+    
+    // Set the position in clip space (normalized device coordinates)
+    gl_Position = vec4(transformedPos, 0.0, 1.0);
+    
+    // Pass the color based on the vertex index
+    vs_out.color = colors[gl_VertexID];
 }
