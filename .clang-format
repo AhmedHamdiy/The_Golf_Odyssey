@@ -1,0 +1,8 @@
+---
+Language: Cpp
+BasedOnStyle: LLVM
+IndentWidth: 4
+SortIncludes: false
+ColumnLimit: 100
+NamespaceIndentation: All
+FixNamespaceComments: false
