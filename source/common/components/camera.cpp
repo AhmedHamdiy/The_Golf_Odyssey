@@ -49,7 +49,7 @@ namespace our {
         // It takes left, right, bottom, top. Bottom is -orthoHeight/2 and Top is orthoHeight/2.
         // Left and Right are the same but after being multiplied by the aspect ratio
         // For the perspective camera, you can use glm::perspective
-        float aspectRatio = viewportSize[0] / viewportSize[1];
+        float aspectRatio = static_cast<float>(viewportSize[0]) / viewportSize[1];
 
         if (cameraType == CameraType::ORTHOGRAPHIC) {
             float vertical = orthoHeight / 2;
