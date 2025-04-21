@@ -48,7 +48,8 @@ namespace our {
         Texture2D* texture;
         Sampler* sampler;
         float alphaThreshold;
-
+        glm::vec2 tiling = {1.0f, 1.0f};
+        
         void setup() const override;
         void deserialize(const nlohmann::json& data) override;
     };

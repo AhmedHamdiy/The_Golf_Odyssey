@@ -49,6 +49,7 @@ namespace our {
         texture->bind();
         if (sampler) sampler->bind(0);
         shader->set("tex", 0);
+        shader->set("tiling", tiling);
     }
 
     // This function read the material data from a json object
@@ -58,6 +59,8 @@ namespace our {
         alphaThreshold = data.value("alphaThreshold", 0.0f);
         texture = AssetLoader<Texture2D>::get(data.value("texture", ""));
         sampler = AssetLoader<Sampler>::get(data.value("sampler", ""));
+        if (data.contains("tiling") && data["tiling"].is_array())
+            tiling = glm::vec2(data["tiling"][0], data["tiling"][1]);
     }
 
 }
