@@ -8,6 +8,10 @@
 #include <systems/movement.hpp>
 #include <asset-loader.hpp>
 
+#include "../common/ecs/entity.hpp"
+
+const float VELOCITY_FACTOR = 0.1f;
+
 // This state shows how to use the ECS framework and deserialization.
 class Playstate: public our::State {
 
@@ -15,6 +19,9 @@ class Playstate: public our::State {
     our::ForwardRenderer renderer;
     our::FreeCameraControllerSystem cameraController;
     our::MovementSystem movementSystem;
+
+    bool ballDragging = false;
+    glm::vec2 dragStart;
 
     void onInitialize() override {
         // First of all, we get the scene configuration from the app config
@@ -60,4 +67,36 @@ class Playstate: public our::State {
         // and we delete all the loaded assets to free memory on the RAM and the VRAM
         our::clearAllAssets();
     }
+
+    virtual void onKeyEvent(int key, int scancode, int action, int mods) override{}      
+    virtual void onCursorMoveEvent(double x, double y)override{}
+    virtual void onCursorEnterEvent(int entered)override{}
+    virtual void onMouseButtonEvent(int button, int action, int mods)override{
+        if(button == GLFW_MOUSE_BUTTON_LEFT){
+            if(action == GLFW_PRESS){
+                dragStart = getApp()->getMouse().getMousePosition();
+                ballDragging = true;
+            }else if(action == GLFW_RELEASE && ballDragging){
+                ballDragging = false;
+                glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
+                glm::vec2 dragVec = dragEnd - dragStart;
+                glm::vec3 velocity(-dragVec.x,0,-dragVec.y);
+                velocity *= VELOCITY_FACTOR;
+                
+                our::Entity* golfBall = nullptr;
+                for (auto entity : world.getEntities()) {
+                    if (entity->name == "ball"){
+                        golfBall = entity;
+                        break;
+                    }
+                }
+                if(golfBall){
+                    auto golfMovementComponent = golfBall->getComponent<our::MovementComponent>();
+                    if(golfMovementComponent) golfMovementComponent->linearVelocity = velocity;
+                }
+            }
+        }
+    }
+    virtual void onScrollEvent(double x_offset, double y_offset)override{}
+
 };
