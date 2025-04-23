@@ -251,6 +251,8 @@ class Playstate : public our::State {
                 0,
             });
 
+        renderer.set_fog_power(1.0f);
+
         // Initialize menu button (top-left corner, 100x50 pixels)
         menuButton.position = {640.0f, 10.0f};
         menuButton.size = {50.0f, 50.0f};

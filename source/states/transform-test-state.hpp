@@ -66,8 +66,8 @@ class TransformTestState: public our::State {
         glClear(GL_COLOR_BUFFER_BIT);
         shader->use();
         for(auto& transform : transforms){
-            // For each transform, we compute the MVP matrix and send it to the "transform" uniform
-            shader->set("transform", VP * transform.toMat4());
+            shader->set("M_transform", transform.toMat4());
+            shader->set("VP_transform", VP);
             // Then we draw a mesh instance
             mesh->draw();
         }

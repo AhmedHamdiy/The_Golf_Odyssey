@@ -68,8 +68,8 @@ class MaterialTestState: public our::State {
         // and send the uniforms that are common between objects using the same material
         material->setup();
         for(auto& transform : transforms){
-            // For each transform, we compute the MVP matrix and send it to the "transform" uniform
-            material->shader->set("transform", VP * transform.toMat4());
+            material->shader->set("M_transform", transform.toMat4());
+            material->shader->set("VP_transform", VP);
             // Then we draw a mesh instance
             mesh->draw();
         }

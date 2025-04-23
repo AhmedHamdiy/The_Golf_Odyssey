@@ -7,8 +7,6 @@
 #include <btBulletDynamicsCommon.h>
 #include <BulletCollision/NarrowPhaseCollision/btRaycastCallback.h>
 
-#define BT_LINE_BATCH_SIZE 512
-
 namespace our {
     class PhysicsSystem {
         std::unordered_map<Entity *, btRigidBody *> collisionObjects;
@@ -19,7 +17,7 @@ namespace our {
         btSequentialImpulseConstraintSolver *solver;
 
         void createDynamicsWorld();
-        btRigidBody *createRigidBody(float mass, const glm::vec3 origin, btCollisionShape *shape,
+        btRigidBody *createRigidBody(float mass, const glm::vec3 origin, const glm::vec3 rotation, btCollisionShape *shape,
                                      bool isKinematic = false);
         void addTriangularMesh(Entity *entity, const std::vector<Vertex> &vertices,
                                const std::vector<unsigned int> &indices);

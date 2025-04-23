@@ -92,7 +92,7 @@ namespace our {
         dynamicsWorld->setGravity(btVector3(0, -9.8, 0));
     }
 
-    btRigidBody *PhysicsSystem::createRigidBody(float mass, const glm::vec3 origin,
+    btRigidBody *PhysicsSystem::createRigidBody(float mass, const glm::vec3 origin, const glm::vec3 rotation,
                                                 btCollisionShape *shape, bool isKinematic) {
         bool isDynamic = (mass != 0.f);
         btVector3 localInertia(0, 0, 0);
@@ -102,6 +102,7 @@ namespace our {
         btTransform transform;
         transform.setIdentity();
         transform.setOrigin(btVector3(origin.x, origin.y, origin.z));
+        transform.setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, 1));
         btDefaultMotionState *motionState = new btDefaultMotionState(transform);
         btRigidBody::btRigidBodyConstructionInfo info(mass, motionState, shape, localInertia);
         btRigidBody *body = new btRigidBody(info);
@@ -136,10 +137,12 @@ namespace our {
         }
         btCollisionShape *shape = new btBvhTriangleMeshShape(triangleMesh, true, true);
         glm::vec3 scale = entity->localTransform.scale;
+        glm::vec3 rotation = entity->localTransform.rotation;
         shape->setLocalScaling(btVector3(scale.x, scale.y, scale.z));
         btScalar mass = btScalar(entity->getComponent<PhysicsComponent>()->mass);
+        collisionType group = entity->getComponent<PhysicsComponent>()->group;
         glm::vec3 origin = entity->localTransform.position;
-        btRigidBody *body = createRigidBody(mass, origin, shape);
+        btRigidBody *body = createRigidBody(mass, origin, rotation, shape, group == collisionType::KINEMATIC);
         collisionObjects[entity] = body;
     }
 
@@ -149,8 +152,10 @@ namespace our {
         glm::vec3 scale = entity->localTransform.scale;
         shape->setLocalScaling(btVector3(scale.x, scale.y, scale.z));
         btScalar mass = btScalar(entity->getComponent<PhysicsComponent>()->mass);
+        glm::vec3 rotation = entity->localTransform.rotation;
+        collisionType group = entity->getComponent<PhysicsComponent>()->group;
         glm::vec3 origin = entity->localTransform.position;
-        btRigidBody *body = createRigidBody(mass, origin, shape);
+        btRigidBody *body = createRigidBody(mass, origin, rotation, shape);
         collisionObjects[entity] = body;
     }
 
@@ -171,7 +176,7 @@ namespace our {
                 if (MeshRendererComponent *meshRenderer =
                         entity->getComponent<MeshRendererComponent>();
                     meshRenderer) {
-                    if (entity->name == "ball")
+                    if (physics->mass != 0)
                         addConvexHullMesh(entity, meshRenderer->mesh->vertices);
                     else
                         addTriangularMesh(entity, meshRenderer->mesh->vertices,

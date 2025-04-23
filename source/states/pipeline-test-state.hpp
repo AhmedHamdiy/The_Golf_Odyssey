@@ -83,7 +83,8 @@ class PipelineTestState: public our::State {
         pipeline.setup();
         // Then we draw the objects
         for(auto& transform : transforms){
-            shader->set("transform", VP * transform.toMat4());
+            shader->set("M_transform", transform.toMat4());
+            shader->set("VP_transform", VP);
             mesh->draw();
         }
     }

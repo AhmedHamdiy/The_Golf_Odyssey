@@ -9,12 +9,13 @@ out Varyings {
     vec2 tex_coord;
 } vs_out;
 
-uniform mat4 transform;
 uniform vec2 tiling;
+uniform mat4 M_transform;
+uniform mat4 VP_transform;
 
 void main(){
     //TODO: (Req 7) Change the next line to apply the transformation matrix
-    gl_Position = transform * vec4(position, 1.0);
+    gl_Position = VP_transform * M_transform * vec4(position, 1.0);
     vs_out.color = color;
     vs_out.tex_coord = tex_coord * tiling;
 }

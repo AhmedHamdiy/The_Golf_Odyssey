@@ -11,7 +11,13 @@
   "scene": {
     "renderer": {
       "sky": {
-        "texture": "assets/textures/sky.jpg"
+        "texture": "assets/textures/sky.jpg",
+        "vs": "assets/shaders/sky.vert",
+        "fs": "assets/shaders/sky.frag",
+        "top_color": [1.0, 0.0, 0.0],
+        "middle_color": [0.5, 0.0, 0.0],
+        "bottom_color": [0.0, 0.0, 0.0],
+        "enabled": true
       },
       "postprocess": "assets/shaders/postprocess/fog.frag"
     },
@@ -24,19 +30,28 @@
         "textured": {
           "vs": "assets/shaders/textured.vert",
           "fs": "assets/shaders/textured.frag"
+        },
+        "lit": {
+          "vs": "assets/shaders/lit.vert",
+          "fs": "assets/shaders/lit.frag"
         }
       },
       "textures": {
         "golf": "assets/textures/golf.jpg",
+        "metal_albedo": "assets/textures/metal/albedo.jpg",
+        "metal_specular": "assets/textures/metal/specular.jpg",
+        "metal_roughness": "assets/textures/metal/roughness.jpg",
         "windmill_base_wood": "assets/textures/windmill_base_wood.jpg",
-        "border_wood": "assets/textures/border_wood.png"
+        "border_wood": "assets/textures/border_wood.png",
+        "wood_albedo": "assets/textures/wood/albedo.jpg",
+        "wood_specular": "assets/textures/wood/specular.jpg",
+        "wood_roughness": "assets/textures/wood/roughness.jpg"
       },
       "meshes": {
         "sphere": "assets/models/sphere.obj",
-        "arrow": "assets/models/ArrowOBJ.obj",  
-        "map_grass": "assets/models/map_grass.obj",
+        "arrow": "assets/models/ArrowOBJ.obj",
+        "map_grass": "assets/models/map_green.obj",
         "map_border": "assets/models/map_border.obj",
-        "flag": "assets/models/flag.obj",
         "windmill_base": "assets/models/windmill_base.obj",
         "windmill_fan": "assets/models/windmill_fan.obj"
       },
@@ -48,8 +63,11 @@
       },
       "materials": {
         "golf": {
-          "type": "textured",
-          "shader": "textured",
+          "type": "lit",
+          "shader": "lit",
+          "albedo_texture": "metal_albedo",
+          "specular_texture": "metal_specular",
+          "roughness_texture": "metal_roughness",
           "pipelineState": {
             "faceCulling": {
               "enabled": false
@@ -58,13 +76,14 @@
               "enabled": true
             }
           },
-          "tint": [1, 1, 1, 1],
-          "texture": "golf",
           "sampler": "default"
         },
-        "windmill_base_wood": {
-          "type": "textured",
-          "shader": "textured",
+        "wood": {
+          "type": "lit",
+          "shader": "lit",
+          "albedo_texture": "wood_albedo",
+          "specular_texture": "wood_specular",
+          "roughness_texture": "wood_roughness",
           "pipelineState": {
             "faceCulling": {
               "enabled": false
@@ -73,8 +92,6 @@
               "enabled": true
             }
           },
-          "tint": [1, 1, 1, 1],
-          "texture": "windmill_base_wood",
           "sampler": "default"
         },
         "border_wood_material": {
@@ -92,32 +109,6 @@
           "texture": "border_wood",
           "sampler": "default"
         },
-        "grass_light": {
-          "type": "tinted",
-          "shader": "tinted",
-          "pipelineState": {
-            "faceCulling": {
-              "enabled": false
-            },
-            "depthTesting": {
-              "enabled": true
-            }
-          },
-          "tint": [0.026186, 0.799106, 0.006932, 1.0]
-        },
-        "grass_medium": {
-          "type": "tinted",
-          "shader": "tinted",
-          "pipelineState": {
-            "faceCulling": {
-              "enabled": false
-            },
-            "depthTesting": {
-              "enabled": true
-            }
-          },
-          "tint": [0.069243, 0.799106, 0.017541, 1.0]
-        },
         "grass_dark": {
           "type": "tinted",
           "shader": "tinted",
@@ -130,45 +121,6 @@
             }
           },
           "tint": [0.0, 0.79927, 0.023178, 1.0]
-        },
-        "dark_blue": {
-          "type": "tinted",
-          "shader": "tinted",
-          "pipelineState": {
-            "faceCulling": {
-              "enabled": false
-            },
-            "depthTesting": {
-              "enabled": true
-            }
-          },
-          "tint": [0.041433, 0.202568, 0.263341, 1.0]
-        },
-        "red_specular": {
-          "type": "tinted",
-          "shader": "tinted",
-          "pipelineState": {
-            "faceCulling": {
-              "enabled": false
-            },
-            "depthTesting": {
-              "enabled": true
-            }
-          },
-          "tint": [0.800007, 0.02092, 0.004197, 1.0]
-        },
-        "flag_material": {
-          "type": "tinted",
-          "shader": "tinted",
-          "pipelineState": {
-            "faceCulling": {
-              "enabled": false
-            },
-            "depthTesting": {
-              "enabled": true
-            }
-          },
-          "tint": [0.4, 0.2, 0.8, 1.0]
         },
         "arrow_material": {
           "type": "tinted",
@@ -198,32 +150,6 @@
         ]
       },
       {
-        "name":"flag",
-        "position":[-230,-7,-100],
-        "scale":[0.5,0.5,0.5],
-        "components":[{"type":"Mesh Renderer",
-        "mesh":"flag",
-        "material":"flag_material"
-        },{
-          "type":"Physics"
-        }]
-      },
-      {
-        "name": "windmill_base",
-        "position": [0, -42, -60],
-        "scale": [3.7, 3.7, 3.7],
-        "components": [
-          {
-            "type": "Mesh Renderer",
-            "mesh": "windmill_base",
-            "material": "border_wood_material"
-          },
-          {
-            "type": "Physics"
-          }
-        ]
-      },
-      {
         "name": "map_green",
         "position": [10, -10, -160],
         "scale": [1, 1, 1],
@@ -231,37 +157,7 @@
           {
             "type": "Mesh Renderer",
             "mesh": "map_grass",
-            "material": "grass_light"
-          },
-          {
-            "type": "Mesh Renderer",
-            "mesh": "map_grass",
-            "material": "grass_medium"
-          },
-          {
-            "type": "Mesh Renderer",
-            "mesh": "map_grass",
-            "material": "grass_light"
-          },
-          {
-            "type": "Mesh Renderer",
-            "mesh": "map_grass",
-            "material": "grass_medium"
-          },
-          {
-            "type": "Mesh Renderer",
-            "mesh": "map_grass",
             "material": "grass_dark"
-          },
-          {
-            "type": "Mesh Renderer",
-            "mesh": "map_grass",
-            "material": "dark_blue"
-          },
-          {
-            "type": "Mesh Renderer",
-            "mesh": "map_grass",
-            "material": "red_specular"
           },
           {
             "type": "Physics"
@@ -283,19 +179,8 @@
         ]
       },
       {
-        "name": "windmill",
-        "position": [0, -42, -60],
-        "rotation": [0, 90, 0],
-        "scale": [3.7, 3.7, 3.7]
-      },
-      {
-        "name": "windmill_fan",
-        "position": [0, 20, -37],
-        "scale": [2, 2, 2]
-      },
-      {
         "name": "ball",
-        "position": [-230, 5, -106],
+        "position": [-237, 5, -211],
         "scale": [1, 1, 1],
         "components": [
           {

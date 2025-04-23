@@ -70,9 +70,9 @@ namespace our {
             glUniform4fv(getUniformLocation(uniform), 1, glm::value_ptr(value));
         }
 
-        void set(const std::string &uniform, glm::mat4 matrix) {
+        void set(const std::string &uniform, glm::mat4 matrix, GLboolean transpose = GL_FALSE) {
             //TODO: (Req 1) Send the given matrix 4x4 value to the given uniform
-            glUniformMatrix4fv(getUniformLocation(uniform), 1, GL_FALSE, glm::value_ptr(matrix));
+            glUniformMatrix4fv(getUniformLocation(uniform), 1, transpose, glm::value_ptr(matrix));
         }
 
         //TODO: (Req 1) Delete the copy constructor and assignment operator.
