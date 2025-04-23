@@ -74,7 +74,8 @@ class Winstate: public our::State {
         // Notice that I don't clear the screen first, since I assume that the menu rectangle will draw over the whole
         // window anyway.
         winMaterial->setup();
-        winMaterial->shader->set("transform", VP*M);
+        winMaterial->shader->set("M_transform", M);
+        winMaterial->shader->set("VP_transform", VP);
         rectangle->draw();
     }
 

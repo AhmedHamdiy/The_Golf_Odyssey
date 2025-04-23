@@ -73,7 +73,8 @@ class Losestate: public our::State {
         // Notice that I don't clear the screen first, since I assume that the menu rectangle will draw over the whole
         // window anyway.
         loseMaterial->setup();
-        loseMaterial->shader->set("transform", VP*M);
+        loseMaterial->shader->set("M_transform", M);
+        loseMaterial->shader->set("VP_transform", VP);
         rectangle->draw();
     }
 

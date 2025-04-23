@@ -52,10 +52,9 @@ class EntityTestState: public our::State {
             our::MeshRendererComponent* meshRenderer = entity->getComponent<our::MeshRendererComponent>();
             if(meshRenderer == nullptr) continue;
             //TODO: (Req 8) Complete the loop body to draw the current entity
-            // Then we setup the material, send the transform matrix to the shader then draw the mesh
-            glm::mat4 transform = VP * entity->getLocalToWorldMatrix();
             meshRenderer->material->setup();
-            meshRenderer->material->shader->set("transform", transform);
+            meshRenderer->material->shader->set("M_transform", entity->getLocalToWorldMatrix());
+            meshRenderer->material->shader->set("VP_transform", VP);
             meshRenderer->mesh->draw();
         }
     }

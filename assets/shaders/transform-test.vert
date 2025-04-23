@@ -12,12 +12,13 @@ out Varyings {
     vec3 normal;
 } vs_out;
 
-uniform mat4 transform;
+uniform mat4 M_transform;
+uniform mat4 VP_transform;
 
 void main(){
     //TODO: (Req 3) Change the next line to apply the transformation matrix
     // 4x4 matrix * 4x1 vector = 4x1 vector which is the new position
-    gl_Position = transform * vec4(position,1.0);
+    gl_Position = VP_transform * M_transform * vec4(position,1.0);
     // No need to change any of the following lines
     vs_out.position = position;
     vs_out.color = color;

@@ -63,4 +63,55 @@ namespace our {
             tiling = glm::vec2(data["tiling"][0], data["tiling"][1]);
     }
 
+    void LitMaterial::setup() const {
+        Material::setup();
+        shader->set("material.albedo_tint", albedo_tint);
+        shader->set("material.specular_tint", specular_tint);
+        shader->set("material.emissive_tint", emissive_tint);
+        shader->set("material.roughness_range", roughness_range);
+        if (albedo_texture) {
+            glActiveTexture(GL_TEXTURE0);
+            albedo_texture->bind();
+            shader->set("material.albedo_tex", 0);
+        }
+        if (specular_texture) {
+            glActiveTexture(GL_TEXTURE1);
+            specular_texture->bind();
+            shader->set("material.specular_tex", 1);
+        }
+        if (ambient_occlusion_texture) {
+            glActiveTexture(GL_TEXTURE2);
+            ambient_occlusion_texture->bind();
+            shader->set("material.ambient_occlusion_tex", 2);
+        }
+        if (roughness_texture) {
+            glActiveTexture(GL_TEXTURE3);
+            roughness_texture->bind();
+            shader->set("material.roughness_tex", 3);
+        }
+        if (emissive_texture) {
+            glActiveTexture(GL_TEXTURE4);
+            emissive_texture->bind();
+            shader->set("material.emissive_tex", 4);
+        }
+        if (sampler) {
+            for (GLuint tex_unit = 0; tex_unit < 5; ++tex_unit)
+                sampler->bind(tex_unit);
+        }
+    }
+
+    void LitMaterial::deserialize(const nlohmann::json& data){
+        Material::deserialize(data);
+        if(!data.is_object()) return;
+        sampler = AssetLoader<Sampler>::get(data.value("sampler", ""));
+        albedo_texture = AssetLoader<Texture2D>::get(data.value("albedo_texture", ""));
+        specular_texture = AssetLoader<Texture2D>::get(data.value("specular_texture", ""));
+        emissive_texture = AssetLoader<Texture2D>::get(data.value("emissive_texture", ""));
+        roughness_texture = AssetLoader<Texture2D>::get(data.value("roughness_texture", ""));
+        ambient_occlusion_texture = AssetLoader<Texture2D>::get(data.value("ambient_occlusion_texture", ""));
+        albedo_tint = data.value("albedo_tint", glm::vec3(1.0f, 1.0f, 1.0f));
+        specular_tint = data.value("specular_tint", glm::vec3(1.0f, 1.0f, 1.0f));
+        emissive_tint = data.value("emissive_tint", glm::vec3(1.0f, 1.0f, 1.0f));
+        roughness_range = data.value("roughness_range", glm::vec2(0.0f, 1.0f));
+    }
 }

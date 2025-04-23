@@ -2,23 +2,29 @@
 
 #include <cassert>
 #include <iostream>
-#include <fstream>
+#include <filesystem>
 #include <string>
+
+#define STB_INCLUDE_LINE_GLSL
+#define STB_INCLUDE_IMPLEMENTATION
+#include <stb/stb_include.h>
 
 //Forward definition for error checking functions
 std::string checkForShaderCompilationErrors(GLuint shader);
 std::string checkForLinkingErrors(GLuint program);
 
-bool our::ShaderProgram::attach(const std::string &filename, GLenum type) const {
-    // Here, we open the file and read a string from it containing the GLSL code of our shader
-    std::ifstream file(filename);
-    if(!file){
-        std::cerr << "ERROR: Couldn't open shader file: " << filename << std::endl;
+bool our::ShaderProgram::attach(const std::string &filename, GLenum type) const { 
+    std::filesystem::path file_path = std::filesystem::path(filename);
+    std::string file_path_string = file_path.string();
+    std::string parent_path_string = file_path.parent_path().string();
+    char *path_to_includes = &(parent_path_string[0]);
+    char files_error[256];
+
+    auto source = stb_include_file(&(file_path_string[0]), nullptr, path_to_includes, files_error);
+    if (!source) {
+        std::cerr << "ERROR: " << files_error << std::endl;
         return false;
     }
-    std::string sourceString = std::string(std::istreambuf_iterator<char>(file), std::istreambuf_iterator<char>());
-    const char* sourceCStr = sourceString.c_str();
-    file.close();
 
     //TODO: Complete this function
     //Note: The function "checkForShaderCompilationErrors" checks if there is
@@ -27,12 +33,14 @@ bool our::ShaderProgram::attach(const std::string &filename, GLenum type) const 
     // the shader. The returned string will be empty if there is no errors.
     std::string error;
     GLuint shader = glCreateShader(type);
-    glShaderSource(shader, 1, &sourceCStr, nullptr);
+    glShaderSource(shader, 1, &source, nullptr);
     glCompileShader(shader);
+    free(source);
     error = checkForShaderCompilationErrors(shader);
     if (!error.empty()) {
         std::cerr << "ERROR: Couldn't compile shader: " << filename << std::endl;
         std::cerr << error << std::endl;
+        glDeleteShader(shader);
         return false;
     }
     glAttachShader(program, shader);
