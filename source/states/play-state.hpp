@@ -124,7 +124,12 @@ class Playstate: public our::State {
         if(button == GLFW_MOUSE_BUTTON_LEFT){
             our::Entity* golfBall = nullptr;
             our::CameraComponent* camera = nullptr;
+            our::MovementComponent *golfMovementComponent = nullptr;
             getNecessaryComponents(camera,golfBall);
+            if(golfBall)
+                golfMovementComponent = golfBall->getComponent<our::MovementComponent>();
+            if(glm::length(golfMovementComponent->linearVelocity) > MIN_VELOCITY)
+                return;
             if(action == GLFW_PRESS){
                 glm::vec2 windowSize = renderer.windowSize;
                 glm::vec3 ballWorldPos = golfBall->localTransform.position;
@@ -148,10 +153,8 @@ class Playstate: public our::State {
                 glm::vec3 velocity(-dragVec.x,0,-dragVec.y);
                 velocity *= VELOCITY_FACTOR;
 
-                if(golfBall){
-                    auto golfMovementComponent = golfBall->getComponent<our::MovementComponent>();
-                    if(golfMovementComponent) golfMovementComponent->linearVelocity = velocity;
-
+                if(golfMovementComponent){
+                    golfMovementComponent->linearVelocity = velocity;
                     glm::vec3 rotationAxis = glm::normalize(glm::cross(velocity, glm::vec3(0, 1, 0)));
                     float angularSpeed = glm::length(velocity) / BALL_RADIUS;
                     golfMovementComponent->angularVelocity = angularSpeed * rotationAxis;
