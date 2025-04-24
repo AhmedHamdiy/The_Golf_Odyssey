@@ -65,9 +65,10 @@ class Playstate: public our::State {
 
             golfMovementComponent->linearVelocity *= std::exp(-DECAY_RATE * deltaTime);
             golfMovementComponent->angularVelocity *= std::exp(-DECAY_RATE * deltaTime);
-            if(ballVelocity < MIN_VELOCITY)
+            if(ballVelocity < MIN_VELOCITY){
                 golfMovementComponent->linearVelocity = glm::vec3(0.0f);
-                // golfMovementComponent->angularVelocity = glm::vec3(0.0f); //bybwz eldenya leh??
+                golfMovementComponent->angularVelocity = glm::vec3(0.0f);
+            }
         }
     }
 
