@@ -28,7 +28,6 @@ namespace our
     // In this project, we only need to implement a forward renderer
     class ForwardRenderer {
         // These window size will be used on multiple occasions (setting the viewport, computing the aspect ratio, etc.)
-        glm::ivec2 windowSize;
         // These are two vectors in which we will store the opaque and the transparent commands.
         // We define them here (instead of being local to the "render" function) as an optimization to prevent reallocating them every frame
         std::vector<RenderCommand> opaqueCommands;
@@ -41,6 +40,8 @@ namespace our
         Texture2D *colorTarget, *depthTarget;
         TexturedMaterial* postprocessMaterial;
     public:
+        glm::ivec2 windowSize;
+
         // Initialize the renderer including the sky and the Postprocessing objects.
         // windowSize is the width & height of the window (in pixels).
         void initialize(glm::ivec2 windowSize, const nlohmann::json& config);
