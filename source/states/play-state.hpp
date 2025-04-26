@@ -11,7 +11,6 @@
 #include "../common/components/camera.hpp"
 #include "../common/components/movement.hpp"
 #include "../common/ecs/entity.hpp"
-#include <glm/gtx/string_cast.hpp>
 
 const float VELOCITY_FACTOR = 0.1f;
 const float MOUSE_TO_BALL_THRESHOLD = 30.0f;// 3ayza a3dl 3leha based on the dimensions of the ball??
@@ -93,8 +92,9 @@ class Playstate: public our::State {
     void onDraw(double deltaTime) override {
         // Here, we just run a bunch of systems to control the world logic
         movementSystem.update(&world, (float)deltaTime);
-        cameraController.update(&world, (float)deltaTime);
-        updateCameraPosition();
+        if(!ballDragging)
+            cameraController.update(&world, (float)deltaTime);
+        // updateCameraPosition();
         updateBallVelocity(deltaTime);
         
         // And finally we use the renderer system to draw the scene
@@ -150,7 +150,15 @@ class Playstate: public our::State {
                 ballDragging = false;
                 glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
                 glm::vec2 dragVec = dragEnd - dragStart;
-                glm::vec3 velocity(-dragVec.x,0,-dragVec.y);
+
+                glm::mat4 viewMatrix = camera->getViewMatrix();
+                glm::vec3 cameraRight = glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+                glm::vec3 cameraUp = glm::vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
+                glm::vec3 cameraForward = glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
+
+                cameraForward.y = 0;
+                cameraForward = glm::normalize(cameraForward);
+                glm::vec3 velocity = (-dragVec.x * cameraRight) + (-dragVec.y * cameraForward);
                 velocity *= VELOCITY_FACTOR;
 
                 if(golfMovementComponent){
