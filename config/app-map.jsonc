@@ -1,0 +1,235 @@
+{
+  "start-scene": "menu",
+  "window": {
+    "title": "Default Game Window",
+    "size": {
+      "width": 1280,
+      "height": 720
+    },
+    "fullscreen": false
+  },
+  "scene": {
+    "renderer": {
+      "sky": "assets/textures/sky.jpg",
+      "postprocess": "assets/shaders/postprocess/vignette.frag"
+    },
+    "assets": {
+      "shaders": {
+        "tinted": {
+          "vs": "assets/shaders/tinted.vert",
+          "fs": "assets/shaders/tinted.frag"
+        },
+        "textured": {
+          "vs": "assets/shaders/textured.vert",
+          "fs": "assets/shaders/textured.frag"
+        }
+      },
+      "textures": {
+        "golf": "assets/textures/golf.jpg"
+      },
+      "meshes": {
+        "sphere": "assets/models/sphere.obj",
+        "map_grass": "assets/models/green.obj",
+        "map_border": "assets/models/border.obj",
+        "windmill_base": "assets/models/windmill.obj"
+        // "windmill_fan": "assets/models/windmill_fan.obj"
+        },
+      "samplers": {
+        "default": {},
+        "pixelated": {
+          "MAG_FILTER": "GL_NEAREST"
+        }
+      },
+      "materials": {
+        "golf": {
+          "type": "textured",
+          "shader": "textured",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [1, 1, 1, 1],
+          "texture": "golf",
+          "sampler": "default"
+        },
+        "grass_light": {
+          "type": "tinted",
+          "shader": "tinted",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [0.026186, 0.799106, 0.006932, 1.0]
+        },
+        "grass_medium": {
+          "type": "tinted",
+          "shader": "tinted",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [0.069243, 0.799106, 0.017541, 1.0]
+        },
+        "grass_dark": {
+          "type": "tinted",
+          "shader": "tinted",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [0.0, 0.799270, 0.023178, 1.0]
+        },
+        "dark_blue": {
+          "type": "tinted",
+          "shader": "tinted",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [0.041433, 0.202568, 0.263341, 1.0]
+        },
+        "red_specular": {
+          "type": "tinted",
+          "shader": "tinted",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [0.800007, 0.020920, 0.004197, 1.0]
+        },
+        "border_metal": {
+          "type": "tinted",
+          "shader": "tinted",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [0.7, 0.7, 0.7, 1.0]
+        },        
+        "windmill_base": {
+            "type": "tinted",
+            "shader": "tinted",
+            "pipelineState": {
+              "faceCulling": {
+                "enabled": false
+              },
+              "depthTesting": {
+                "enabled": true
+              }
+            },
+            "tint": [0.4, 0.4, 0.996078, 1.0]
+        }
+      }
+    },
+    "world": [
+      {
+        "position": [0, 0, 10],
+        "components": [
+          {
+            "type": "Camera"
+          },
+          {
+            "type": "Free Camera Controller"
+          }
+        ]
+      },
+      {
+        "position": [0, 0, 0],
+        "scale": [1, 1, 1],
+        "components": [
+          {
+            "type": "Mesh Renderer",
+            "mesh": "map_grass",
+            "material": "grass_light"
+          },
+          {
+            "type": "Mesh Renderer",
+            "mesh": "map_grass",
+            "material": "grass_medium"
+          },
+          {
+            "type": "Mesh Renderer",
+            "mesh": "map_grass",
+            "material": "grass_dark"
+          },
+          {
+            "type": "Mesh Renderer",
+            "mesh": "map_grass",
+            "material": "dark_blue"
+          },
+          {
+            "type": "Mesh Renderer",
+            "mesh": "map_grass",
+            "material": "red_specular"
+          }
+        ]
+      },
+      {
+        "position": [0, 0, 0],
+        "scale": [1, 1, 1],
+        "components": [
+          {
+            "type": "Mesh Renderer",
+            "mesh": "map_border",
+            "material": "border_metal"
+          }
+        ]
+      },
+      {
+        "position": [0, 0, 0],
+        "scale": [1, 1, 1],
+        "components": [
+          {
+            "type": "Mesh Renderer",
+            "mesh": "windmill_base",
+            "material": "windmill_base"
+          }
+        ]
+      },
+      {
+        "name": "ball",
+        "position": [0, 0, 0],
+        "scale": [1, 1, 1],
+        "components": [
+          {
+            "type": "Mesh Renderer",
+            "mesh": "sphere",
+            "material": "golf"
+          },
+          {
+            "type": "Movement",
+            "linearVelocity": [0, 0, 0]
+          }
+        ]
+      }
+    ]
+  }
+}
