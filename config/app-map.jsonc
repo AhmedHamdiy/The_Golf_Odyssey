@@ -25,14 +25,16 @@
         }
       },
       "textures": {
-        "golf": "assets/textures/golf.jpg"
+        "golf": "assets/textures/golf.jpg",
+        "windmill_base_wood": "assets/textures/windmill_base_wood.jpg",
+        "border_wood": "assets/textures/border_wood.png"
       },
       "meshes": {
         "sphere": "assets/models/sphere.obj",
         "map_grass": "assets/models/green.obj",
         "map_border": "assets/models/border.obj",
-        "windmill_base": "assets/models/windmill.obj"
-        // "windmill_fan": "assets/models/windmill_fan.obj"
+        "windmill_base": "assets/models/windmill_base.obj",
+        "windmill_fan": "assets/models/windmill_fan_.obj"
         },
       "samplers": {
         "default": {},
@@ -54,6 +56,36 @@
           },
           "tint": [1, 1, 1, 1],
           "texture": "golf",
+          "sampler": "default"
+        },
+        "windmill_base_wood": {
+          "type": "textured",
+          "shader": "textured",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [1, 1, 1, 1],
+          "texture": "windmill_base_wood",
+          "sampler": "default"
+        },
+        "border_wood_material": {
+          "type": "textured",
+          "shader": "textured",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [1, 1, 1, 1],
+          "texture": "border_wood",
           "sampler": "default"
         },
         "grass_light": {
@@ -121,7 +153,7 @@
           },
           "tint": [0.800007, 0.020920, 0.004197, 1.0]
         },
-        "border_metal": {
+        "windmill_fan_material": {
           "type": "tinted",
           "shader": "tinted",
           "pipelineState": {
@@ -132,20 +164,7 @@
               "enabled": true
             }
           },
-          "tint": [0.7, 0.7, 0.7, 1.0]
-        },        
-        "windmill_base": {
-            "type": "tinted",
-            "shader": "tinted",
-            "pipelineState": {
-              "faceCulling": {
-                "enabled": false
-              },
-              "depthTesting": {
-                "enabled": true
-              }
-            },
-            "tint": [0.4, 0.4, 0.996078, 1.0]
+          "tint": [0.7, 0.7, 0.1, 1.0]
         }
       }
     },
@@ -163,7 +182,7 @@
       },
       {
         "position": [0, 0, 0],
-        "scale": [1, 1, 1],
+        "scale": [0.35, 1, 0.35],
         "components": [
           {
             "type": "Mesh Renderer",
@@ -194,29 +213,49 @@
       },
       {
         "position": [0, 0, 0],
-        "scale": [1, 1, 1],
+        "scale": [0.35, 1, 0.35],
         "components": [
           {
             "type": "Mesh Renderer",
             "mesh": "map_border",
-            "material": "border_metal"
+            "material": "border_wood_material"
           }
         ]
       },
       {
-        "position": [0, 0, 0],
-        "scale": [1, 1, 1],
+        "name": "windmill",
+        "position": [-4,-6.9, 50],
+        "rotation": [0, 90,0],
+        "scale": [1.2, 1.2, 1.2],
         "components": [
           {
             "type": "Mesh Renderer",
             "mesh": "windmill_base",
-            "material": "windmill_base"
+            "material": "windmill_base_wood"
           }
         ]
       },
       {
+      "name": "windmill_fan",
+      "position": [-4, -6.9, 50],
+      "rotation": [0, 90, 0],
+      "scale": [1, 1, 1],
+      "components": [
+        {
+          "type": "Mesh Renderer",
+          "mesh": "windmill_fan",
+          "material": "windmill_fan_material"
+        },
+        {
+          "type": "Movement",
+          "angularVelocity": [100, 0, 0],
+          "rotationAxis": "local"
+        }
+      ]
+      },
+      {
         "name": "ball",
-        "position": [0, 0, 0],
+        "position": [0, -3.7, 0],
         "scale": [1, 1, 1],
         "components": [
           {
