@@ -7,16 +7,19 @@
 #include <systems/free-camera-controller.hpp>
 #include <systems/movement.hpp>
 #include <asset-loader.hpp>
+#include <mesh/mesh-utils.hpp>
 
 #include "../common/components/camera.hpp"
 #include "../common/components/movement.hpp"
 #include "../common/ecs/entity.hpp"
 
-const float VELOCITY_FACTOR = 0.1f;
+const float VELOCITY_FACTOR = 0.3f;
 const float MOUSE_TO_BALL_THRESHOLD = 30.0f;// 3ayza a3dl 3leha based on the dimensions of the ball??
 const float BALL_RADIUS = 0.5f;
 const float DECAY_RATE = 0.98f;
 const float MIN_VELOCITY = 0.1f;
+const float MAX_VELOCITY = 10.0f;
+
 const glm::vec3 CAMERA_OFFSET(0.0f, 5.0f, 10.0f);
 
 
@@ -31,9 +34,10 @@ class Playstate: public our::State {
     bool ballDragging = false;
     glm::vec2 dragStart;
 
-    void getNecessaryComponents(our::CameraComponent* &camera, our::Entity* &golfBall){
+    void getNecessaryComponents(our::CameraComponent* &camera, our::Entity* &golfBall, our::Entity* &arrow){
         for (auto entity : world.getEntities()) {
             if (entity->name == "ball") golfBall = entity;
+            else if (entity->name == "arrow") arrow = entity;
             else if(!camera) camera = entity->getComponent<our::CameraComponent>();  
         }
     }
@@ -41,7 +45,8 @@ class Playstate: public our::State {
     void updateCameraPosition(){
         our::Entity* golfBall = nullptr;
         our::CameraComponent* camera = nullptr;
-        getNecessaryComponents(camera,golfBall);
+        our::Entity* arrow = nullptr;
+        getNecessaryComponents(camera,golfBall,arrow);
 
         if (golfBall && camera) {
             if(glm::length(golfBall->getComponent<our::MovementComponent>()->linearVelocity) < MIN_VELOCITY) return;
@@ -55,7 +60,8 @@ class Playstate: public our::State {
     void updateBallVelocity(double deltaTime){
         our::Entity* golfBall = nullptr;
         our::CameraComponent* camera = nullptr;
-        getNecessaryComponents(camera,golfBall);
+        our::Entity* arrow = nullptr;
+        getNecessaryComponents(camera,golfBall,arrow);
 
         auto golfMovementComponent = golfBall->getComponent<our::MovementComponent>();
         if(golfMovementComponent){
@@ -70,6 +76,48 @@ class Playstate: public our::State {
             }
         }
     }
+
+    glm::vec3 getColorFromPower(float power, float maxPower = 300.0f) {
+        float t = glm::clamp(power / maxPower, 0.0f, 1.0f);
+        return glm::vec3(glm::min(2.0f * t, 1.0f), glm::min(2.0f * (1.0f - t), 1.0f), 0.0f);
+    }
+
+    void updateArrow(){
+        our::Entity* golfBall = nullptr;
+        our::CameraComponent* camera = nullptr;
+        our::Entity* arrow = nullptr;
+        getNecessaryComponents(camera, golfBall, arrow);
+        if (!golfBall || !arrow || !camera) return;
+    
+        glm::vec2 mousePos = getApp()->getMouse().getMousePosition();
+        glm::vec2 dragVec = dragStart -mousePos;
+        float dragPower = glm::length(dragVec);
+        // std::cout<<"power: "<<dragPower<<"\n";
+        glm::mat4 viewMatrix = camera->getViewMatrix();
+        glm::vec3 camRight = glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
+        glm::vec3 camForward = glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
+    
+        camForward.y = 0;
+        camForward = glm::normalize(camForward);
+        camRight = glm::normalize(camRight);
+    
+        glm::vec3 worldDir = -dragVec.x * camRight - dragVec.y * camForward;
+    
+        if(glm::length(worldDir) == 0) return;
+        worldDir = glm::normalize(worldDir);
+    
+        float angle = atan2(worldDir.x, worldDir.z);
+    
+        arrow->localTransform.rotation = glm::vec3(-glm::half_pi<float>(), angle, -glm::pi<float>());
+        arrow->localTransform.position = golfBall->localTransform.position + worldDir * BALL_RADIUS;
+        arrow->localTransform.scale = glm::vec3(0.5f, dragPower * 0.01f, 0.5f);
+
+        glm::vec3 color = getColorFromPower(dragPower);
+        our::TintedMaterial* material = dynamic_cast<our::TintedMaterial*>(arrow->getComponent<our::MeshRendererComponent>()->material);
+        if(material) material->tint = glm::vec4(color,1.0f);
+    }
+    
+    
 
     void onInitialize() override {
         // First of all, we get the scene configuration from the app config
@@ -95,6 +143,7 @@ class Playstate: public our::State {
         if(!ballDragging)
             cameraController.update(&world, (float)deltaTime);
         // updateCameraPosition();
+        if(ballDragging) updateArrow();
         updateBallVelocity(deltaTime);
         
         // And finally we use the renderer system to draw the scene
@@ -125,7 +174,8 @@ class Playstate: public our::State {
             our::Entity* golfBall = nullptr;
             our::CameraComponent* camera = nullptr;
             our::MovementComponent *golfMovementComponent = nullptr;
-            getNecessaryComponents(camera,golfBall);
+            our::Entity *arrow = nullptr;
+            getNecessaryComponents(camera,golfBall,arrow);
             if(golfBall)
                 golfMovementComponent = golfBall->getComponent<our::MovementComponent>();
             if(glm::length(golfMovementComponent->linearVelocity) > MIN_VELOCITY)
@@ -147,6 +197,8 @@ class Playstate: public our::State {
                     ballDragging = true;
                 }
             }else if(action == GLFW_RELEASE && ballDragging){
+                arrow->localTransform.scale = glm::vec3(0,0,0);
+
                 ballDragging = false;
                 glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
                 glm::vec2 dragVec = dragEnd - dragStart;
