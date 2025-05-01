@@ -75,9 +75,22 @@
     "xlocmes": "cpp",
     "xlocmon": "cpp",
     "xloctime": "cpp",
-    "xtree": "cpp"
+    "xtree": "cpp",
+    "complex": "cpp",
+    "condition_variable": "cpp",
+    "mutex": "cpp",
+    "random": "cpp",
+    "set": "cpp",
+    "stop_token": "cpp",
+    "thread": "cpp"
   },
   "cmake.debugConfig": {
     "cwd": "${workspaceFolder}"
+  },
+  "github.copilot.enable": {
+    "*": true,
+    "plaintext": false,
+    "markdown": true,
+    "scminput": false
   }
 }

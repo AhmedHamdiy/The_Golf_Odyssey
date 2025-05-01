@@ -6,6 +6,7 @@
 #include <systems/forward-renderer.hpp>
 #include <systems/free-camera-controller.hpp>
 #include <systems/movement.hpp>
+#include <systems/physics.hpp>
 #include <asset-loader.hpp>
 #include <mesh/mesh-utils.hpp>
 
@@ -30,6 +31,7 @@ class Playstate: public our::State {
     our::ForwardRenderer renderer;
     our::FreeCameraControllerSystem cameraController;
     our::MovementSystem movementSystem;
+    our::PhysicsSystem physicsSystem;
 
     bool ballDragging = false;
     glm::vec2 dragStart;
@@ -130,6 +132,8 @@ class Playstate: public our::State {
         if(config.contains("world")){
             world.deserialize(config["world"]);
         }
+        // we add the physics system to the world
+        physicsSystem.addComponents(&world);
         // We initialize the camera controller system since it needs a pointer to the app
         cameraController.enter(getApp());
         // Then we initialize the renderer
@@ -139,6 +143,7 @@ class Playstate: public our::State {
 
     void onDraw(double deltaTime) override {
         // Here, we just run a bunch of systems to control the world logic
+        physicsSystem.update((float)deltaTime);
         movementSystem.update(&world, (float)deltaTime);
         if(!ballDragging)
             cameraController.update(&world, (float)deltaTime);

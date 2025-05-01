@@ -21,6 +21,9 @@ namespace our
         GLsizei elementCount;
 
     public:
+        std::vector<Vertex> vertices;
+        std::vector<unsigned int> elements;
+
         // The constructor takes two vectors:
         // - vertices which contain the vertex data.
         // - elements which contain the indices of the vertices out of which each rectangle will be constructed.
@@ -29,6 +32,7 @@ namespace our
         // an element buffer to store the element data on the VRAM,
         // a vertex array object to define how to read the vertex & element buffer during rendering
         Mesh(const std::vector<Vertex> &vertices, const std::vector<unsigned int> &elements)
+            : vertices(vertices), elements(elements)
         {
             elementCount = static_cast<GLsizei>(elements.size());
 
