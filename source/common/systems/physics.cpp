@@ -33,7 +33,7 @@ namespace our
 		return body;
 	}
 
-    void PhysicsSystem::addTriangularMesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices) {
+    void PhysicsSystem::addTriangularMesh(Entity *entity, const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices) {
         btTriangleMesh * triangleMesh = new btTriangleMesh();
         for (int i = 0; i < indices.size(); i += 3) {
             glm::vec3 p1 = vertices[indices[i]].position;
@@ -47,19 +47,18 @@ namespace our
             );
         }
         btCollisionShape* shape = new btBvhTriangleMeshShape(triangleMesh, true, true);
-        collisionShapes.push_back(shape);
-        createRigidBody(btScalar(0.0f), glm::vec3(0, 0, 0), shape);
+        btCollisionObject* body = createRigidBody(btScalar(0.0f), glm::vec3(0, 0, 0), shape);
+        collisionObjects[body] = entity;
 	}
 
-    void PhysicsSystem::addConvexHullMesh(std::vector<Vertex> &vertices, float mass) {
+    void PhysicsSystem::addConvexHullMesh(Entity *entity, const std::vector<Vertex> &vertices, float mass) {
         btConvexHullShape *shape = new btConvexHullShape(
             (btScalar*) &vertices[0].position,
             vertices.size(),
             sizeof(Vertex)
         );
-
-        collisionShapes.push_back(shape);
-        createRigidBody(btScalar(mass), glm::vec3(0, 0, 0), shape);
+        btCollisionObject* body = createRigidBody(btScalar(mass), glm::vec3(0, 0, 0), shape);
+        collisionObjects[body] = entity;
 	}
 
     PhysicsSystem::PhysicsSystem() {
@@ -67,16 +66,17 @@ namespace our
     }
 
     void PhysicsSystem::addComponents(World* world) {
-        for(auto entity : world->getEntities()){
-            MeshRendererComponent* meshRenderer = entity->getComponent<MeshRendererComponent>();
-            if(meshRenderer) addTriangularMesh(meshRenderer->mesh->vertices, meshRenderer->mesh->elements);
+        for(auto entity : world->getEntities()) {
+            if(PhysicsComponent *physics = entity->getComponent<PhysicsComponent>(); physics) {
+                if (MeshRendererComponent *meshRenderer = entity->getComponent<MeshRendererComponent>(); meshRenderer)
+                    addTriangularMesh(entity, meshRenderer->mesh->vertices, meshRenderer->mesh->elements);
+            }
         }
     }
 
-    void PhysicsSystem::update(float deltaTime)
+    void PhysicsSystem::update(World* world, float deltaTime)
 	{
 		if (dynamicsWorld) {
-            dynamicsWorld->stepSimulation(deltaTime);
             for (int i = dynamicsWorld->getNumCollisionObjects() - 1; i >= 0; i--)
             {
                 btCollisionObject* obj = dynamicsWorld->getCollisionObjectArray()[i];
@@ -84,11 +84,23 @@ namespace our
                 btTransform transform;
                 if (body && body->getMotionState()) {
                     body->getMotionState()->getWorldTransform(transform);
+                    Entity* entity = collisionObjects[obj];
+                    btVector3 position = transform.getOrigin();
+                    btQuaternion rotation = transform.getRotation();
+                    entity->localTransform.position = glm::vec3(position.getX(), position.getY(), position.getZ());
+                    entity->localTransform.rotation = glm::vec3(rotation.getX(), rotation.getY(), rotation.getZ());
                 }
                 else {
                     transform = obj->getWorldTransform();
+                    Entity* entity = collisionObjects[obj];
+                    glm::vec3 position = entity->localTransform.position;
+                    glm::vec3 rotation = entity->localTransform.rotation;
+                    transform.setOrigin(btVector3(position.x, position.y, position.z));
+                    transform.setRotation(btQuaternion(rotation.x, rotation.y, rotation.z, 1.0f));
+                    obj->setWorldTransform(transform);
                 }
             }
+            dynamicsWorld->stepSimulation(deltaTime);
         }
 	}
 
@@ -112,19 +124,11 @@ namespace our
                     delete obj;
                 }
             }
-
-            for (int j = 0; j < collisionShapes.size(); j++)
-            {
-                btCollisionShape* shape = collisionShapes[j];
-                collisionShapes[j] = nullptr;
-                delete shape;
-            }
             
             delete dynamicsWorld;
             delete collisionConfiguration;
             delete dispatcher;
             delete solver;
             delete broadphase;
-            collisionShapes.clear();
     }
 }
