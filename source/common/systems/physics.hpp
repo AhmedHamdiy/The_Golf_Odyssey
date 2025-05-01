@@ -18,10 +18,13 @@ namespace our
 		btSequentialImpulseConstraintSolver* solver;
 
         void createDynamicsWorld();
-        btRigidBody* createRigidBody(float mass, const btTransform& startTransform, btCollisionShape* shape);
-    public:
+        btRigidBody* createRigidBody(float mass, const glm::vec3 origin, btCollisionShape* shape);
+        void addTriangularMesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices);
+        void addConvexHullMesh(std::vector<Vertex> &vertices, float mass);
+        public:
         PhysicsSystem();
-        void stepSimulation(float deltaTime);
+        void PhysicsSystem::addComponents(World* world);
+        void update(float deltaTime);
         ~PhysicsSystem();
     };
 }
