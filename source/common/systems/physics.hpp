@@ -10,7 +10,7 @@
 namespace our
 {
     class PhysicsSystem {
-        btAlignedObjectArray<btCollisionShape*> collisionShapes;
+        std::unordered_map<btCollisionObject*, Entity*> collisionObjects;
         btDiscreteDynamicsWorld *dynamicsWorld;
         btDefaultCollisionConfiguration *collisionConfiguration;
 		btCollisionDispatcher *dispatcher;
@@ -19,12 +19,12 @@ namespace our
 
         void createDynamicsWorld();
         btRigidBody* createRigidBody(float mass, const glm::vec3 origin, btCollisionShape* shape);
-        void addTriangularMesh(std::vector<Vertex> &vertices, std::vector<unsigned int> &indices);
-        void addConvexHullMesh(std::vector<Vertex> &vertices, float mass);
-        public:
+        void addTriangularMesh(Entity *entity, const std::vector<Vertex> &vertices, const std::vector<unsigned int> &indices);
+        void addConvexHullMesh(Entity *entity, const std::vector<Vertex> &vertices, float mass);
+    public:
         PhysicsSystem();
         void PhysicsSystem::addComponents(World* world);
-        void update(float deltaTime);
+        void update(World* world, float deltaTime);
         ~PhysicsSystem();
     };
 }

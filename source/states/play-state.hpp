@@ -95,12 +95,12 @@ class Playstate: public our::State {
 
     void onDraw(double deltaTime) override {
         // Here, we just run a bunch of systems to control the world logic
-        physicsSystem.update((float)deltaTime);
         movementSystem.update(&world, (float)deltaTime);
         if(!ballDragging)
-            cameraController.update(&world, (float)deltaTime);
+        cameraController.update(&world, (float)deltaTime);
         // updateCameraPosition();
         updateBallVelocity(deltaTime);
+        physicsSystem.update(&world, (float)deltaTime);
         
         // And finally we use the renderer system to draw the scene
         renderer.render(&world);
