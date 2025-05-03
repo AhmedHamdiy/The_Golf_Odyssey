@@ -82,7 +82,15 @@
     "random": "cpp",
     "set": "cpp",
     "stop_token": "cpp",
-    "thread": "cpp"
+    "thread": "cpp",
+    "cwctype": "cpp",
+    "numbers": "cpp",
+    "span": "cpp",
+    "variant": "cpp",
+    "memory_resource": "cpp",
+    "string_view": "cpp",
+    "text_encoding": "cpp",
+    "cinttypes": "cpp"
   },
   "cmake.debugConfig": {
     "cwd": "${workspaceFolder}"
