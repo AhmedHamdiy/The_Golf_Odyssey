@@ -85,17 +85,17 @@ class Playstate: public our::State {
             world.deserialize(config["world"]);
         }
         // we add the physics system to the world
-        physicsSystem.addComponents(&world);
         // We initialize the camera controller system since it needs a pointer to the app
         cameraController.enter(getApp());
         // Then we initialize the renderer
         auto size = getApp()->getFrameBufferSize();
+        physicsSystem.addComponents(&world, size);
         renderer.initialize(size, config["renderer"]);
     }
 
     void onDraw(double deltaTime) override {
         // Here, we just run a bunch of systems to control the world logic
-        movementSystem.update(&world, (float)deltaTime);
+        movementSystem.update(&world, (float)deltaTime, physicsSystem.getRigidBodies());
         if(!ballDragging)
         cameraController.update(&world, (float)deltaTime);
         // updateCameraPosition();
@@ -104,6 +104,7 @@ class Playstate: public our::State {
         
         // And finally we use the renderer system to draw the scene
         renderer.render(&world);
+        physicsSystem.physicsDebugDraw();
 
         // Get a reference to the keyboard object
         auto& keyboard = getApp()->getKeyboard();
