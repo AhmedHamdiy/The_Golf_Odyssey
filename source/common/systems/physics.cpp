@@ -1,6 +1,5 @@
 #include "physics.hpp"
 #include "../components/mesh-renderer.hpp"
-#include <iostream>
 
 namespace our {
 
@@ -112,10 +111,10 @@ namespace our {
                                     btCollisionObject::CF_KINEMATIC_OBJECT);
         if (isDynamic) {
             body->setFriction(0.6f);
-            body->setRestitution(0.2f);
-            body->setRollingFriction(0.05f);
-            body->setSpinningFriction(0.01f);
-            body->setDamping(0.01f, 0.6f);
+            body->setRestitution(0.1f);
+            body->setRollingFriction(0.1f);
+            body->setSpinningFriction(0.05f);
+            body->setDamping(0.05f, 0.8f);
         } else {
             body->setFriction(0.8f);
             body->setRestitution(0.8f);
@@ -136,16 +135,19 @@ namespace our {
                                       btVector3(p3.x, p3.y, p3.z));
         }
         btCollisionShape *shape = new btBvhTriangleMeshShape(triangleMesh, true, true);
+        glm::vec3 scale = entity->localTransform.scale;
+        shape->setLocalScaling(btVector3(scale.x, scale.y, scale.z));
         btScalar mass = btScalar(entity->getComponent<PhysicsComponent>()->mass);
         glm::vec3 origin = entity->localTransform.position;
         btRigidBody *body = createRigidBody(mass, origin, shape);
         collisionObjects[entity] = body;
-        std::cout << "Adding physics to entity: " << entity->name << std::endl;
     }
 
     void PhysicsSystem::addConvexHullMesh(Entity *entity, const std::vector<Vertex> &vertices) {
         btConvexHullShape *shape = new btConvexHullShape((btScalar *)&vertices[0].position,
                                                          vertices.size(), sizeof(Vertex));
+        glm::vec3 scale = entity->localTransform.scale;
+        shape->setLocalScaling(btVector3(scale.x, scale.y, scale.z));
         btScalar mass = btScalar(entity->getComponent<PhysicsComponent>()->mass);
         glm::vec3 origin = entity->localTransform.position;
         btRigidBody *body = createRigidBody(mass, origin, shape);
@@ -169,9 +171,6 @@ namespace our {
                 if (MeshRendererComponent *meshRenderer =
                         entity->getComponent<MeshRendererComponent>();
                     meshRenderer) {
-                    // addTriangularMesh(entity, meshRenderer->mesh->vertices,
-                    //                   meshRenderer->mesh->elements);
-                    // addConvexHullMesh(entity, meshRenderer->mesh->vertices);
                     if (entity->name == "ball")
                         addConvexHullMesh(entity, meshRenderer->mesh->vertices);
                     else
