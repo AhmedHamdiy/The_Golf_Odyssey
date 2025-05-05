@@ -181,9 +181,11 @@ class Playstate: public our::State {
             our::MovementComponent *golfMovementComponent = nullptr;
             our::Entity *arrow = nullptr;
             getNecessaryComponents(camera,golfBall,arrow);
+            btRigidBody* body = physicsSystem.getRigidBodies()[golfBall];
+            
             if(golfBall)
                 golfMovementComponent = golfBall->getComponent<our::MovementComponent>();
-            if(glm::length(golfMovementComponent->linearVelocity) > MIN_VELOCITY)
+            if(glm::length(body->getLinearVelocity().length()) > MIN_VELOCITY)
                 return;
             if(action == GLFW_PRESS){
                 glm::vec2 windowSize = renderer.windowSize;
