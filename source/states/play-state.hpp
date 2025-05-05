@@ -14,12 +14,13 @@
 #include "../common/components/movement.hpp"
 #include "../common/ecs/entity.hpp"
 
-const float VELOCITY_FACTOR = 0.3f;
-const float MOUSE_TO_BALL_THRESHOLD = 30.0f;// 3ayza a3dl 3leha based on the dimensions of the ball??
+const float VELOCITY_FACTOR = 0.2f;
+const float MOUSE_TO_BALL_THRESHOLD = 30.0f;
 const float BALL_RADIUS = 0.5f;
 const float DECAY_RATE = 0.98f;
-const float MIN_VELOCITY = 0.1f;
-const float MAX_VELOCITY = 10.0f;
+const float MIN_VELOCITY = 0.5f;
+const float MAX_VELOCITY = 300.0f;
+const float MAX_POWER = 300.0f;
 
 const glm::vec3 CAMERA_OFFSET(0.0f, 5.0f, 10.0f);
 
@@ -64,9 +65,9 @@ class Playstate: public our::State {
         our::CameraComponent* camera = nullptr;
         our::Entity* arrow = nullptr;
         getNecessaryComponents(camera,golfBall,arrow);
-
         auto golfMovementComponent = golfBall->getComponent<our::MovementComponent>();
         if(golfMovementComponent){
+        std::cout<<"max velocity: "<< glm::length(golfMovementComponent->linearVelocity)<<"\n";
             float ballVelocity = glm::length(golfMovementComponent->linearVelocity);
             if(ballVelocity == 0.0f) return;
 
@@ -75,6 +76,9 @@ class Playstate: public our::State {
             if(ballVelocity < MIN_VELOCITY){
                 golfMovementComponent->linearVelocity = glm::vec3(0.0f);
                 golfMovementComponent->angularVelocity = glm::vec3(0.0f);
+            }else if(ballVelocity > MAX_VELOCITY){
+                golfMovementComponent->linearVelocity = MAX_VELOCITY * glm::normalize(golfMovementComponent->linearVelocity);
+                golfMovementComponent->angularVelocity = MAX_VELOCITY * glm::normalize(golfMovementComponent->linearVelocity);
             }
         }
     }
@@ -93,8 +97,8 @@ class Playstate: public our::State {
     
         glm::vec2 mousePos = getApp()->getMouse().getMousePosition();
         glm::vec2 dragVec = dragStart -mousePos;
-        float dragPower = glm::length(dragVec);
-        // std::cout<<"power: "<<dragPower<<"\n";
+        float dragPower = glm::min(glm::length(dragVec), MAX_POWER);
+        std::cout<<"power: "<<dragPower<<"\n";
         glm::mat4 viewMatrix = camera->getViewMatrix();
         glm::vec3 camRight = glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
         glm::vec3 camForward = glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
@@ -112,14 +116,21 @@ class Playstate: public our::State {
     
         arrow->localTransform.rotation = glm::vec3(-glm::half_pi<float>(), angle, -glm::pi<float>());
         arrow->localTransform.position = golfBall->localTransform.position + worldDir * BALL_RADIUS;
-        arrow->localTransform.scale = glm::vec3(0.5f, dragPower * 0.01f, 0.5f); /////////////////////
+        arrow->localTransform.scale = glm::vec3(0.5f, dragPower * 0.01f, 0.5f);
 
         glm::vec3 color = getColorFromPower(dragPower);
         our::TintedMaterial* material = dynamic_cast<our::TintedMaterial*>(arrow->getComponent<our::MeshRendererComponent>()->material);
         if(material) material->tint = glm::vec4(color,1.0f);
     }
     
-    
+    void autoRelease(){
+        glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
+        glm::vec2 dragVec = dragEnd - dragStart;
+        
+        if(glm::length(dragVec) == 0.0f) return;
+        if(glm::length(dragVec) >= MAX_VELOCITY) onMouseButtonEvent(GLFW_MOUSE_BUTTON_LEFT, GLFW_RELEASE, 0);
+
+    }
 
     void onInitialize() override {
         // First of all, we get the scene configuration from the app config
@@ -144,11 +155,11 @@ class Playstate: public our::State {
     void onDraw(double deltaTime) override {
         // Here, we just run a bunch of systems to control the world logic
         movementSystem.update(&world, (float)deltaTime, physicsSystem.getRigidBodies());
-        if(!ballDragging)
-        cameraController.update(&world, (float)deltaTime);
+        if(!ballDragging) cameraController.update(&world, (float)deltaTime);
         // updateCameraPosition();
         if(ballDragging) updateArrow();
-        updateBallVelocity(deltaTime);
+        autoRelease();
+        // updateBallVelocity(deltaTime);
         physicsSystem.update(&world, (float)deltaTime);
         
         // And finally we use the renderer system to draw the scene
@@ -200,7 +211,7 @@ class Playstate: public our::State {
 
                 float distance = glm::distance(ballPos,mousePos);
                 if(distance < MOUSE_TO_BALL_THRESHOLD){
-                    dragStart = mousePos;
+                    dragStart = ballPos;
                     ballDragging = true;
                 }
             }else if(action == GLFW_RELEASE && ballDragging){
@@ -209,7 +220,10 @@ class Playstate: public our::State {
                 ballDragging = false;
                 glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
                 glm::vec2 dragVec = dragEnd - dragStart;
+                
                 if(glm::length(dragVec) == 0.0f) return;
+                if(glm::length(dragVec) >= MAX_VELOCITY) dragVec = MAX_VELOCITY * glm::normalize(dragVec);
+
                 glm::mat4 viewMatrix = camera->getViewMatrix();
                 glm::vec3 cameraRight = glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
                 glm::vec3 cameraUp = glm::vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
@@ -219,6 +233,7 @@ class Playstate: public our::State {
                 cameraForward = glm::normalize(cameraForward);
                 glm::vec3 velocity = (-dragVec.x * cameraRight) + (-dragVec.y * cameraForward);
                 velocity *= VELOCITY_FACTOR;
+                std::cout<<"velocity: "<<glm::length(velocity)<<"\n";
 
                 if(golfMovementComponent){
                     golfMovementComponent->linearVelocity = velocity;
