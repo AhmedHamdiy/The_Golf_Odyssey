@@ -32,8 +32,9 @@
         "sphere": "assets/models/sphere.obj",
         "map_grass": "assets/models/green.obj",
         "map_border": "assets/models/border.obj",
-        "map_alt": "assets/models/map_alt.fbx"
-        },
+        "map_alt": "assets/models/map_alt.fbx",
+        "arrow": "assets/models/ArrowOBJ.obj"
+      },
       "samplers": {
         "default": {},
         "pixelated": {
@@ -108,7 +109,7 @@
               "enabled": true
             }
           },
-          "tint": [0.0, 0.799270, 0.023178, 1.0]
+          "tint": [0.0, 0.79927, 0.023178, 1.0]
         },
         "dark_blue": {
           "type": "tinted",
@@ -134,7 +135,20 @@
               "enabled": true
             }
           },
-          "tint": [0.800007, 0.020920, 0.004197, 1.0]
+          "tint": [0.800007, 0.02092, 0.004197, 1.0]
+        },
+        "arrow_material": {
+          "type": "tinted",
+          "shader": "tinted",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": true
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [1.0, 0.0, 0.0, 1.0]
         }
       }
     },
@@ -197,6 +211,19 @@
           {
             "type": "Movement",
             "linearVelocity": [0, 0, 0]
+          }
+        ]
+      },
+      {
+        "name": "arrow",
+        "position": [0, 0, 0],
+        "scale": [0, 0, 0],
+        "rotation": [0, 0, 0],
+        "components": [
+          {
+            "type": "Mesh Renderer",
+            "mesh": "arrow",
+            "material": "arrow_material"
           }
         ]
       }

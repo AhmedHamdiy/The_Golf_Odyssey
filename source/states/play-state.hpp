@@ -112,7 +112,7 @@ class Playstate: public our::State {
     
         arrow->localTransform.rotation = glm::vec3(-glm::half_pi<float>(), angle, -glm::pi<float>());
         arrow->localTransform.position = golfBall->localTransform.position + worldDir * BALL_RADIUS;
-        arrow->localTransform.scale = glm::vec3(0.5f, dragPower * 0.01f, 0.5f);
+        arrow->localTransform.scale = glm::vec3(0.5f, dragPower * 0.01f, 0.5f); /////////////////////
 
         glm::vec3 color = getColorFromPower(dragPower);
         our::TintedMaterial* material = dynamic_cast<our::TintedMaterial*>(arrow->getComponent<our::MeshRendererComponent>()->material);
@@ -207,7 +207,7 @@ class Playstate: public our::State {
                 ballDragging = false;
                 glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
                 glm::vec2 dragVec = dragEnd - dragStart;
-
+                if(glm::length(dragVec) == 0.0f) return;
                 glm::mat4 viewMatrix = camera->getViewMatrix();
                 glm::vec3 cameraRight = glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
                 glm::vec3 cameraUp = glm::vec3(viewMatrix[0][1], viewMatrix[1][1], viewMatrix[2][1]);
