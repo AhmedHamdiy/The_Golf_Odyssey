@@ -30,10 +30,11 @@
       },
       "meshes": {
         "sphere": "assets/models/sphere.obj",
-        "map_grass": "assets/models/green.obj",
-        "map_border": "assets/models/border.obj",
-        "map_alt": "assets/models/map_alt.fbx",
-        "arrow": "assets/models/ArrowOBJ.obj"
+        "arrow": "assets/models/ArrowOBJ.obj",  
+        "map_grass": "assets/models/map_green.obj",
+        "map_border": "assets/models/map_border.obj",
+        "windmill_base": "assets/models/windmill_base.obj",
+        "windmill_fan": "assets/models/windmill_fan.obj"
       },
       "samplers": {
         "default": {},
@@ -163,40 +164,69 @@
             "type": "Free Camera Controller"
           }
         ]
-      },
-      {
-        "name": "map",
-        "position": [0, 0, 0],
-        "scale": [0.35, 1, 0.35],
+      },{
+        "name": "map_green",
+        "position": [10, -10, -160],
+        "scale": [1, 1, 1],
         "components": [
           {
-            "type": "Physics"
+            "type": "Mesh Renderer",
+            "mesh": "map_grass",
+            "material": "grass_light"
+          },
+          {
+            "type": "Mesh Renderer",
+            "mesh": "map_grass",
+            "material": "grass_medium"
           },
           {
             "type": "Mesh Renderer",
             "mesh": "map_grass",
             "material": "grass_dark"
+          },
+          {
+            "type": "Mesh Renderer",
+            "mesh": "map_grass",
+            "material": "dark_blue"
+          },
+          {
+            "type": "Mesh Renderer",
+            "mesh": "map_grass",
+            "material": "red_specular"
+          },
+          {
+            "type": "Physics"
           }
         ]
       },
       {
-        "name": "border",
-        "position": [0, 0, 0],
-        "scale": [0.35, 1, 0.35],
+        "position": [10, -10, -160],
+        "scale": [1, 1, 1],
         "components": [
-          {
-            "type": "Physics"
-          },
           {
             "type": "Mesh Renderer",
             "mesh": "map_border",
             "material": "border_wood_material"
+          },
+          {
+            "type": "Physics"
           }
         ]
       },
       {
+        "name": "windmill",
+        "position": [0, -42, -60],
+        "rotation": [0, 90, 0],
+        "scale": [3.7, 3.7, 3.7]
+      },
+      {
+        "name": "windmill_fan",
+        "position": [0, 20, -37],
+        "scale": [2, 2, 2]
+      },
+      {
         "name": "ball",
-        "position": [0, 3, 0],
+        "position": [0, 5, 0],
         "scale": [1, 1, 1],
         "components": [
           {
@@ -206,7 +236,7 @@
           },
           {
             "type": "Physics",
-            "mass": 1.0
+            "mass": 10.0
           },
           {
             "type": "Movement",
@@ -226,6 +256,12 @@
             "material": "arrow_material"
           }
         ]
+      },
+      {
+        "name": "windmill",
+        "position": [-4, -6.9, 50],
+        "rotation": [0, 90, 0],
+        "scale": [1.2, 1.2, 1.2]
       }
     ]
   }
