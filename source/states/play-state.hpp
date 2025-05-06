@@ -3,6 +3,9 @@
 #include <chrono>
 #include <application.hpp>
 
+#include <ft2build.h>
+#include FT_FREETYPE_H
+
 #include <ecs/world.hpp>
 #include <systems/forward-renderer.hpp>
 #include <systems/free-camera-controller.hpp>
@@ -51,16 +54,9 @@ class Playstate: public our::State {
         }
     }
 
-    void loadScreen(bool win){
-        if(win) std::cout<<"win\n";
-        else std::cout<<"lose\n";
-    }
-
     void updateState(int time, bool fell){
-        if(time >= MAX_TIME) return loadScreen(false);
-        if(fell) return loadScreen(false);
-        if(strokesNum >= MAX_STROKES && !won) return loadScreen(won);
-        if(won) loadScreen(won);
+        if(time >= MAX_TIME || fell || (strokesNum >= MAX_STROKES && !won)) return getApp()->changeState("lose");
+        if(won) return getApp()->changeState("win");;
     }
     
     void updateCameraPosition(){
