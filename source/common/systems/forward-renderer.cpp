@@ -225,6 +225,26 @@ namespace our {
 
             //TODO: (Req 11) Setup the postprocess material and draw the fullscreen triangle
             postprocessMaterial->setup();
+
+            // Bind the color texture to texture unit 0
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, colorTarget->getOpenGLName());
+            postprocessMaterial->shader->set("color_sampler", 0);
+        
+            // // Bind the depth texture to texture unit 1
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, depthTarget->getOpenGLName());
+            postprocessMaterial->shader->set("depth_sampler", 1);
+        
+            // Set the inverse projection matrix
+            postprocessMaterial->shader->set("inverse_projection", glm::inverse(camera->getProjectionMatrix(windowSize)));
+        
+            // Set fog parameters
+            postprocessMaterial->shader->set("fog_color", glm::vec3(0.8f, 0.8f, 0.8f)); // Example fog color
+            postprocessMaterial->shader->set("fog_power", 0.9f); // Example fog power
+            postprocessMaterial->shader->set("fog_exponent", 0.02f); // Example fog exponent
+            
+
             glBindVertexArray(postProcessVertexArray);
             glDrawArrays(GL_TRIANGLES, 0, 3);
             glBindVertexArray(0);
