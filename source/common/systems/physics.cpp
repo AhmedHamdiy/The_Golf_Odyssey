@@ -110,7 +110,7 @@ namespace our {
             body->setCollisionFlags(body->getCollisionFlags() |
                                     btCollisionObject::CF_KINEMATIC_OBJECT);
         if (isDynamic) {
-            body->setFriction(0.6f);
+            body->setFriction(1.5f);
             body->setRestitution(0.1f);
             body->setRollingFriction(0.1f);
             body->setSpinningFriction(0.05f);
