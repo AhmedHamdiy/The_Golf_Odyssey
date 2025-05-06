@@ -22,7 +22,6 @@ set(BUILD_CLSOCKET OFF CACHE BOOL "" FORCE)
 
 
 add_subdirectory(vendor/glfw)                       # Build the GLFW project to use later as a library
-add_subdirectory(vendor/freetype)
 add_subdirectory(vendor/bullet3)
 
 # A variable with all the source files of GLAD
@@ -109,7 +108,6 @@ include_directories(
         vendor/imgui
         vendor/utils
         vendor/bullet3/src
-        vendor/freetype/include
 )
 
 
@@ -120,8 +118,6 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_SOURCE_DIR}/bin)
 set(STATES_SOURCES
         source/states/play-state.hpp
         source/states/menu-state.hpp
-        source/states/win-state.hpp
-        source/states/lose-state.hpp
         source/states/shader-test-state.hpp
         source/states/mesh-test-state.hpp
         source/states/transform-test-state.hpp
@@ -142,7 +138,6 @@ target_link_libraries(GAME_APPLICATION
         BulletDynamics
         BulletCollision
         LinearMath
-        freetype
 )
 
 if(NOT CMAKE_BUILD_TYPE)
