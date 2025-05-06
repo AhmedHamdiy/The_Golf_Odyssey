@@ -46,6 +46,18 @@ class Playstate: public our::State {
     std::chrono::steady_clock::time_point startTime;
     std::chrono::steady_clock::time_point currentTime;
 
+    our::ShaderProgram *shader;
+    //this struct is copied from learnopengl.com
+    struct Character { 
+        unsigned int textureID;  // ID handle of the glyph texture
+        glm::ivec2   Size;       // Size of glyph
+        glm::ivec2   Bearing;    // Offset from baseline to left/top of glyph
+        unsigned int advance;    // Offset to advance to next glyph
+    };
+    
+    std::map<char, Character> Characters;
+    unsigned int VAO, VBO;
+    
     void getNecessaryComponents(our::CameraComponent* &camera, our::Entity* &golfBall, our::Entity* &arrow){
         for (auto entity : world.getEntities()) {
             if (entity->name == "ball") golfBall = entity;
@@ -136,14 +148,6 @@ class Playstate: public our::State {
         our::TintedMaterial* material = dynamic_cast<our::TintedMaterial*>(arrow->getComponent<our::MeshRendererComponent>()->material);
         if(material) material->tint = glm::vec4(color,1.0f);
     }
-    
-    void updateTimer(){
-
-    }
-
-    void updateStrokesNum(){
-        
-    }
 
     void autoRelease(){
         glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
@@ -173,7 +177,8 @@ class Playstate: public our::State {
         physicsSystem.addComponents(&world, size);
         renderer.initialize(size, config["renderer"]);
         startTime = std::chrono::high_resolution_clock::now();
-
+        
+        // initializeFont();
     }
 
     void onDraw(double deltaTime) override {
