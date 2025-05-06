@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <application.hpp>
 
 #include <ecs/world.hpp>
@@ -21,9 +22,10 @@ const float DECAY_RATE = 0.98f;
 const float MIN_VELOCITY = 0.5f;
 const float MAX_VELOCITY = 300.0f;
 const float MAX_POWER = 300.0f;
-
+const int MAX_STROKES = 15;
+const int MAX_TIME = 90;
+const int FELL_THRESHOLD = -15;
 const glm::vec3 CAMERA_OFFSET(0.0f, 5.0f, 10.0f);
-
 
 // This state shows how to use the ECS framework and deserialization.
 class Playstate: public our::State {
@@ -35,7 +37,11 @@ class Playstate: public our::State {
     our::PhysicsSystem physicsSystem;
 
     bool ballDragging = false;
+    bool won = false;
+    int strokesNum = 0;
     glm::vec2 dragStart;
+    std::chrono::steady_clock::time_point startTime;
+    std::chrono::steady_clock::time_point currentTime;
 
     void getNecessaryComponents(our::CameraComponent* &camera, our::Entity* &golfBall, our::Entity* &arrow){
         for (auto entity : world.getEntities()) {
@@ -43,6 +49,18 @@ class Playstate: public our::State {
             else if (entity->name == "arrow") arrow = entity;
             else if(!camera) camera = entity->getComponent<our::CameraComponent>();  
         }
+    }
+
+    void loadScreen(bool win){
+        if(win) std::cout<<"win\n";
+        else std::cout<<"lose\n";
+    }
+
+    void updateState(int time, bool fell){
+        if(time >= MAX_TIME) return loadScreen(false);
+        if(fell) return loadScreen(false);
+        if(strokesNum >= MAX_STROKES && !won) return loadScreen(won);
+        if(won) loadScreen(won);
     }
     
     void updateCameraPosition(){
@@ -123,6 +141,14 @@ class Playstate: public our::State {
         if(material) material->tint = glm::vec4(color,1.0f);
     }
     
+    void updateTimer(){
+
+    }
+
+    void updateStrokesNum(){
+        
+    }
+
     void autoRelease(){
         glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
         glm::vec2 dragVec = dragEnd - dragStart;
@@ -150,10 +176,25 @@ class Playstate: public our::State {
         auto size = getApp()->getFrameBufferSize();
         physicsSystem.addComponents(&world, size);
         renderer.initialize(size, config["renderer"]);
+        startTime = std::chrono::high_resolution_clock::now();
+
     }
 
     void onDraw(double deltaTime) override {
         // Here, we just run a bunch of systems to control the world logic
+        currentTime = std::chrono::high_resolution_clock::now();
+        int elapsed = std::chrono::duration<float>(currentTime - startTime).count();
+
+        our::Entity* golfBall = nullptr;
+        our::CameraComponent* camera = nullptr;
+        our::MovementComponent *golfMovementComponent = nullptr;
+        our::Entity *arrow = nullptr;
+        getNecessaryComponents(camera,golfBall,arrow);
+        std::cout<<"y= "<<golfBall->localTransform.position.y<<"\n";
+        bool fell = golfBall->localTransform.position.y < FELL_THRESHOLD ? true: false;
+        updateState(elapsed, fell);
+        if(elapsed >= MAX_TIME || (strokesNum >= MAX_STROKES && !won) || won || fell) return;
+
         movementSystem.update(&world, (float)deltaTime, physicsSystem.getRigidBodies());
         if(!ballDragging) cameraController.update(&world, (float)deltaTime);
         // updateCameraPosition();
@@ -213,6 +254,7 @@ class Playstate: public our::State {
                 if(distance < MOUSE_TO_BALL_THRESHOLD){
                     dragStart = ballPos;
                     ballDragging = true;
+                    strokesNum++;
                 }
             }else if(action == GLFW_RELEASE && ballDragging){
                 arrow->localTransform.scale = glm::vec3(0,0,0);
