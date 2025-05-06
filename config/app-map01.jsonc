@@ -11,7 +11,7 @@
   "scene": {
     "renderer": {
       "sky": "assets/textures/sky.jpg",
-      "postprocess": "assets/shaders/postprocess/vignette.frag"
+      "postprocess": "assets/shaders/postprocess/fog.frag"
     },
     "assets": {
       "shaders": {
@@ -31,10 +31,10 @@
       },
       "meshes": {
         "sphere": "assets/models/sphere.obj",
-        "map_grass": "assets/models/green.obj",
-        "map_border": "assets/models/border.obj",
+        "map_grass": "assets/models/map_grass.obj",
+        "map_border": "assets/models/map_border.obj",
         "windmill_base": "assets/models/windmill_base.obj",
-        "windmill_fan": "assets/models/windmill_fan_.obj",
+        "windmill_fan": "assets/models/windmill_fan.obj",
         "arrow": "assets/models/ArrowOBJ.obj"
       },
       "samplers": {

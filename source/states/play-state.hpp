@@ -1,6 +1,10 @@
 #pragma once
 
+#include <chrono>
 #include <application.hpp>
+
+#include <ft2build.h>
+#include FT_FREETYPE_H
 
 #include <ecs/world.hpp>
 #include <systems/forward-renderer.hpp>
@@ -21,9 +25,10 @@ const float DECAY_RATE = 0.98f;
 const float MIN_VELOCITY = 0.5f;
 const float MAX_VELOCITY = 300.0f;
 const float MAX_POWER = 300.0f;
-
+const int MAX_STROKES = 15;
+const int MAX_TIME = 90;
+const int FELL_THRESHOLD = -15;
 const glm::vec3 CAMERA_OFFSET(0.0f, 5.0f, 10.0f);
-
 
 // This state shows how to use the ECS framework and deserialization.
 class Playstate: public our::State {
@@ -35,14 +40,24 @@ class Playstate: public our::State {
     our::PhysicsSystem physicsSystem;
 
     bool ballDragging = false;
+    bool won = false;
+    int strokesNum = 0;
     glm::vec2 dragStart;
+    std::chrono::steady_clock::time_point startTime;
+    std::chrono::steady_clock::time_point currentTime;
 
-    void getNecessaryComponents(our::CameraComponent* &camera, our::Entity* &golfBall, our::Entity* &arrow){
+    void getNecessaryComponents(our::CameraComponent *&camera, our::Entity *&golfBall,
+                                our::Entity *&arrow) {
         for (auto entity : world.getEntities()) {
             if (entity->name == "ball") golfBall = entity;
             else if (entity->name == "arrow") arrow = entity;
             else if(!camera) camera = entity->getComponent<our::CameraComponent>();  
         }
+    }
+
+    void updateState(int time, bool fell){
+        if(time >= MAX_TIME || fell || (strokesNum > MAX_STROKES && !won)) return getApp()->changeState("lose");
+        if(won) return getApp()->changeState("win");
     }
     
     void updateCameraPosition(){
@@ -52,33 +67,40 @@ class Playstate: public our::State {
         getNecessaryComponents(camera,golfBall,arrow);
 
         if (golfBall && camera) {
-            if(glm::length(golfBall->getComponent<our::MovementComponent>()->linearVelocity) < MIN_VELOCITY) return;
+            if (glm::length(golfBall->getComponent<our::MovementComponent>()->linearVelocity) <
+                MIN_VELOCITY)
+                return;
             glm::vec3 ballPos = golfBall->localTransform.position;
             glm::vec3 desiredCamPos = ballPos + CAMERA_OFFSET;
             camera->getOwner()->localTransform.position = desiredCamPos;
-            camera->getOwner()->localTransform.rotation = glm::eulerAngles(glm::quatLookAt(glm::normalize(ballPos - desiredCamPos), glm::vec3(0.0f, 1.0f, 0.0f)));
+            camera->getOwner()->localTransform.rotation = glm::eulerAngles(glm::quatLookAt(
+                glm::normalize(ballPos - desiredCamPos), glm::vec3(0.0f, 1.0f, 0.0f)));
         }
     }
 
-    void updateBallVelocity(double deltaTime){
-        our::Entity* golfBall = nullptr;
-        our::CameraComponent* camera = nullptr;
-        our::Entity* arrow = nullptr;
-        getNecessaryComponents(camera,golfBall,arrow);
+    void updateBallVelocity(double deltaTime) {
+        our::Entity *golfBall = nullptr;
+        our::CameraComponent *camera = nullptr;
+        our::Entity *arrow = nullptr;
+        getNecessaryComponents(camera, golfBall, arrow);
         auto golfMovementComponent = golfBall->getComponent<our::MovementComponent>();
-        if(golfMovementComponent){
-        std::cout<<"max velocity: "<< glm::length(golfMovementComponent->linearVelocity)<<"\n";
+        if (golfMovementComponent) {
+            std::cout << "max velocity: " << glm::length(golfMovementComponent->linearVelocity)
+                      << "\n";
             float ballVelocity = glm::length(golfMovementComponent->linearVelocity);
-            if(ballVelocity == 0.0f) return;
+            if (ballVelocity == 0.0f)
+                return;
 
             golfMovementComponent->linearVelocity *= std::exp(-DECAY_RATE * deltaTime);
             golfMovementComponent->angularVelocity *= std::exp(-DECAY_RATE * deltaTime);
-            if(ballVelocity < MIN_VELOCITY){
+            if (ballVelocity < MIN_VELOCITY) {
                 golfMovementComponent->linearVelocity = glm::vec3(0.0f);
                 golfMovementComponent->angularVelocity = glm::vec3(0.0f);
-            }else if(ballVelocity > MAX_VELOCITY){
-                golfMovementComponent->linearVelocity = MAX_VELOCITY * glm::normalize(golfMovementComponent->linearVelocity);
-                golfMovementComponent->angularVelocity = MAX_VELOCITY * glm::normalize(golfMovementComponent->linearVelocity);
+            } else if (ballVelocity > MAX_VELOCITY) {
+                golfMovementComponent->linearVelocity =
+                    MAX_VELOCITY * glm::normalize(golfMovementComponent->linearVelocity);
+                golfMovementComponent->angularVelocity =
+                    MAX_VELOCITY * glm::normalize(golfMovementComponent->linearVelocity);
             }
         }
     }
@@ -88,41 +110,46 @@ class Playstate: public our::State {
         return glm::vec3(glm::min(2.0f * t, 1.0f), glm::min(2.0f * (1.0f - t), 1.0f), 0.0f);
     }
 
-    void updateArrow(){
-        our::Entity* golfBall = nullptr;
-        our::CameraComponent* camera = nullptr;
-        our::Entity* arrow = nullptr;
+    void updateArrow() {
+        our::Entity *golfBall = nullptr;
+        our::CameraComponent *camera = nullptr;
+        our::Entity *arrow = nullptr;
         getNecessaryComponents(camera, golfBall, arrow);
-        if (!golfBall || !arrow || !camera) return;
-    
+        if (!golfBall || !arrow || !camera)
+            return;
+
         glm::vec2 mousePos = getApp()->getMouse().getMousePosition();
-        glm::vec2 dragVec = dragStart -mousePos;
+        glm::vec2 dragVec = dragStart - mousePos;
         float dragPower = glm::min(glm::length(dragVec), MAX_POWER);
-        std::cout<<"power: "<<dragPower<<"\n";
+        std::cout << "power: " << dragPower << "\n";
         glm::mat4 viewMatrix = camera->getViewMatrix();
         glm::vec3 camRight = glm::vec3(viewMatrix[0][0], viewMatrix[1][0], viewMatrix[2][0]);
         glm::vec3 camForward = glm::vec3(viewMatrix[0][2], viewMatrix[1][2], viewMatrix[2][2]);
-    
+
         camForward.y = 0;
         camForward = glm::normalize(camForward);
         camRight = glm::normalize(camRight);
-    
+
         glm::vec3 worldDir = -dragVec.x * camRight - dragVec.y * camForward;
-    
-        if(glm::length(worldDir) == 0) return;
+
+        if (glm::length(worldDir) == 0)
+            return;
         worldDir = glm::normalize(worldDir);
-    
+
         float angle = atan2(worldDir.x, worldDir.z);
-    
-        arrow->localTransform.rotation = glm::vec3(-glm::half_pi<float>(), angle, -glm::pi<float>());
+
+        arrow->localTransform.rotation =
+            glm::vec3(-glm::half_pi<float>(), angle, -glm::pi<float>());
         arrow->localTransform.position = golfBall->localTransform.position + worldDir * BALL_RADIUS;
         arrow->localTransform.scale = glm::vec3(0.5f, dragPower * 0.01f, 0.5f);
 
         glm::vec3 color = getColorFromPower(dragPower);
-        our::TintedMaterial* material = dynamic_cast<our::TintedMaterial*>(arrow->getComponent<our::MeshRendererComponent>()->material);
-        if(material) material->tint = glm::vec4(color,1.0f);
+        our::TintedMaterial *material = dynamic_cast<our::TintedMaterial *>(
+            arrow->getComponent<our::MeshRendererComponent>()->material);
+        if (material)
+            material->tint = glm::vec4(color, 1.0f);
     }
-    
+
     void autoRelease(){
         glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
         glm::vec2 dragVec = dragEnd - dragStart;
@@ -150,10 +177,26 @@ class Playstate: public our::State {
         auto size = getApp()->getFrameBufferSize();
         physicsSystem.addComponents(&world, size);
         renderer.initialize(size, config["renderer"]);
+        startTime = std::chrono::high_resolution_clock::now();
+        
+        // initializeFont();
     }
 
     void onDraw(double deltaTime) override {
         // Here, we just run a bunch of systems to control the world logic
+        currentTime = std::chrono::high_resolution_clock::now();
+        int elapsed = std::chrono::duration<float>(currentTime - startTime).count();
+
+        our::Entity* golfBall = nullptr;
+        our::CameraComponent* camera = nullptr;
+        our::MovementComponent *golfMovementComponent = nullptr;
+        our::Entity *arrow = nullptr;
+        getNecessaryComponents(camera,golfBall,arrow);
+        std::cout<<"y= "<<golfBall->localTransform.position.y<<"\n";
+        bool fell = golfBall->localTransform.position.y < FELL_THRESHOLD ? true: false;
+        updateState(elapsed, fell);
+        if(elapsed >= MAX_TIME || (strokesNum > MAX_STROKES && !won) || won || fell) return;
+
         movementSystem.update(&world, (float)deltaTime, physicsSystem.getRigidBodies());
         if(!ballDragging) cameraController.update(&world, (float)deltaTime);
         // updateCameraPosition();
@@ -213,6 +256,7 @@ class Playstate: public our::State {
                 if(distance < MOUSE_TO_BALL_THRESHOLD){
                     dragStart = ballPos;
                     ballDragging = true;
+                    strokesNum++;
                 }
             }else if(action == GLFW_RELEASE && ballDragging){
                 arrow->localTransform.scale = glm::vec3(0,0,0);
