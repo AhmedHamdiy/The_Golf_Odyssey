@@ -90,6 +90,7 @@ namespace our {
             postprocessMaterial->sampler = postprocessSampler;
             // The default options are fine but we don't need to interact with the depth buffer
             // so it is more performant to disable the depth mask
+            fogPower= 0.0f;
             postprocessMaterial->pipelineState.depthMask = false;
         }
     }
@@ -113,6 +114,10 @@ namespace our {
             delete postprocessMaterial->shader;
             delete postprocessMaterial;
         }
+    }
+
+    void ForwardRenderer::set_fog_power(glm::float32 power){
+        fogPower = power;
     }
 
     void ForwardRenderer::render(World* world){
@@ -241,7 +246,7 @@ namespace our {
         
             // Set fog parameters
             postprocessMaterial->shader->set("fog_color", glm::vec3(0.8f, 0.8f, 0.8f)); // Example fog color
-            postprocessMaterial->shader->set("fog_power", 0.9f); // Example fog power
+            postprocessMaterial->shader->set("fog_power", fogPower); // Example fog power
             postprocessMaterial->shader->set("fog_exponent", 0.02f); // Example fog exponent
             
 
