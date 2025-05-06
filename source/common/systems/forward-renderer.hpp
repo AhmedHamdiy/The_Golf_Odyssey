@@ -35,6 +35,7 @@ namespace our
         // Objects used for rendering a skybox
         Mesh* skySphere;
         TexturedMaterial* skyMaterial;
+        glm::float32 fogPower = 0.0f;
         // Objects used for Postprocessing
         GLuint postprocessFrameBuffer, postProcessVertexArray;
         Texture2D *colorTarget, *depthTarget;
@@ -45,6 +46,7 @@ namespace our
         // Initialize the renderer including the sky and the Postprocessing objects.
         // windowSize is the width & height of the window (in pixels).
         void initialize(glm::ivec2 windowSize, const nlohmann::json& config);
+        void set_fog_power(glm::float32 power);
         // Clean up the renderer
         void destroy();
         // This function should be called every frame to draw the given world
