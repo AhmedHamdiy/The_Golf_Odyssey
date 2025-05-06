@@ -35,7 +35,7 @@ namespace our
         // Objects used for rendering a skybox
         Mesh* skySphere;
         TexturedMaterial* skyMaterial;
-        glm::float32 fogPower = 0.0f;
+        glm::float32 fogPower = 0.1f;
         // Objects used for Postprocessing
         GLuint postprocessFrameBuffer, postProcessVertexArray;
         Texture2D *colorTarget, *depthTarget;
