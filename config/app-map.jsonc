@@ -180,6 +180,32 @@
         ]
       },
       {
+        "name":"flag",
+        "position":[-230,-7,-100],
+        "scale":[0.5,0.5,0.5],
+        "components":[{"type":"Mesh Renderer",
+        "mesh":"flag",
+        "material":"flag_material"
+        },{
+          "type":"Physics"
+        }]
+      },
+      {
+        "name": "windmill_base",
+        "position": [0, -42, -60],
+        "scale": [3.7, 3.7, 3.7],
+        "components": [
+          {
+            "type": "Mesh Renderer",
+            "mesh": "windmill_base",
+            "material": "border_wood_material"
+          },
+          {
+            "type": "Physics"
+          }
+        ]
+      },
+      {
         "name": "map_green",
         "position": [10, -10, -160],
         "scale": [1, 1, 1],

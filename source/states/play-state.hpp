@@ -83,7 +83,7 @@ class Playstate : public our::State {
             glm::vec3 ballPos = golfBall->localTransform.position;
             float h = -237.0f;
             float k = -106.0f;
-            float r = 6.0f;
+            float r = 10.0f;
             float distanceSquared =
                 (ballPos.x - h) * (ballPos.x - h) + (ballPos.z - k) * (ballPos.z - k);
             if (distanceSquared <= r * r) {
