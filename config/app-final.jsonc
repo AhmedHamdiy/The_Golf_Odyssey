@@ -37,8 +37,8 @@
         }
       },
       "textures": {
-        "golf": "assets/textures/golf.jpg",
-        "metal_albedo": "assets/textures/metal/albedo.jpg",
+        "golf_albedo": "assets/textures/golf.jpg",
+
         "metal_specular": "assets/textures/metal/specular.jpg",
         "metal_roughness": "assets/textures/metal/roughness.jpg",
         "windmill_base_wood": "assets/textures/windmill_base_wood.jpg",

@@ -92,8 +92,9 @@ namespace our {
         dynamicsWorld->setGravity(btVector3(0, -9.8, 0));
     }
 
-    btRigidBody *PhysicsSystem::createRigidBody(float mass, const glm::vec3 origin, const glm::vec3 rotation,
-                                                btCollisionShape *shape, bool isKinematic) {
+    btRigidBody *PhysicsSystem::createRigidBody(float mass, const glm::vec3 origin,
+                                                const glm::vec3 rotation, btCollisionShape *shape,
+                                                bool isKinematic) {
         bool isDynamic = (mass != 0.f);
         btVector3 localInertia(0, 0, 0);
         if (isDynamic)
@@ -107,9 +108,12 @@ namespace our {
         btRigidBody::btRigidBodyConstructionInfo info(mass, motionState, shape, localInertia);
         btRigidBody *body = new btRigidBody(info);
         body->setUserIndex(-1);
-        if (isKinematic)
-            body->setCollisionFlags(body->getCollisionFlags() |
-                                    btCollisionObject::CF_KINEMATIC_OBJECT);
+        if (isKinematic) {
+            int flags = body->getCollisionFlags();
+            flags &= ~btCollisionObject::CF_STATIC_OBJECT;
+            body->setCollisionFlags(flags | btCollisionObject::CF_KINEMATIC_OBJECT);
+            body->setActivationState(DISABLE_DEACTIVATION);
+        }
         if (isDynamic) {
             body->setFriction(1.5f);
             body->setRestitution(0.1f);
@@ -142,7 +146,8 @@ namespace our {
         btScalar mass = btScalar(entity->getComponent<PhysicsComponent>()->mass);
         collisionType group = entity->getComponent<PhysicsComponent>()->group;
         glm::vec3 origin = entity->localTransform.position;
-        btRigidBody *body = createRigidBody(mass, origin, rotation, shape, group == collisionType::KINEMATIC);
+        btRigidBody *body =
+            createRigidBody(mass, origin, rotation, shape, group == collisionType::KINEMATIC);
         collisionObjects[entity] = body;
     }
 

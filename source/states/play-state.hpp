@@ -3,9 +3,6 @@
 #include <chrono>
 #include <application.hpp>
 
-#include <ft2build.h>
-#include FT_FREETYPE_H
-
 #include <ecs/world.hpp>
 #include <systems/forward-renderer.hpp>
 #include <systems/free-camera-controller.hpp>
@@ -273,12 +270,12 @@ class Playstate : public our::State {
         std::cout << "Position: (" << golfBall->localTransform.position.x << ", "
                   << golfBall->localTransform.position.y << ", "
                   << golfBall->localTransform.position.z << ")\n";
-        // Print the timer
-        // int remainingTime = MAX_TIME - elapsed;
-        // int minutes = remainingTime / 60;
-        // int seconds = remainingTime % 60;
-        // std::cout << "Time Remaining: " << minutes << ":" << (seconds < 10 ? "0" : "") << seconds
-        //           << "\n";
+
+        int remainingTime = MAX_TIME - elapsed;
+        int minutes = remainingTime / 60;
+        int seconds = remainingTime % 60;
+        std::cout << "Time Remaining: " << minutes << ":" << (seconds < 10 ? "0" : "") << seconds
+                  << "\n";
         bool fell = golfBall->localTransform.position.y < FELL_THRESHOLD ? true : false;
         btRigidBody *body = physicsSystem.getRigidBodies()[golfBall];
         updateState(elapsed, fell, golfBall);
