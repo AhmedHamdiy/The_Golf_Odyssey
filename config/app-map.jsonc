@@ -13,7 +13,7 @@
       "sky": {
         "texture": "assets/textures/sky.jpg"
       },
-      "postprocess": "assets/shaders/postprocess/fog.frag"
+      "postprocess": "assets/shaders/postprocess/chromatic-aberration.frag"
     },
     "assets": {
       "shaders": {
@@ -33,7 +33,7 @@
       },
       "meshes": {
         "sphere": "assets/models/sphere.obj",
-        "arrow": "assets/models/ArrowOBJ.obj",  
+        "arrow": "assets/models/ArrowOBJ.obj",
         "map_grass": "assets/models/map_grass.obj",
         "map_border": "assets/models/map_border.obj",
         "flag": "assets/models/flag.obj",
@@ -198,28 +198,54 @@
         ]
       },
       {
-        "name":"flag",
-        "position":[-230,-7,-100],
-        "scale":[0.5,0.5,0.5],
-        "components":[{"type":"Mesh Renderer",
-        "mesh":"flag",
-        "material":"flag_material"
-        },{
-          "type":"Physics"
-        }]
+        "name": "flag",
+        "position": [-230, -7, -100],
+        "scale": [0.5, 0.5, 0.5],
+        "components": [
+          {
+            "type": "Mesh Renderer",
+            "mesh": "flag",
+            "material": "flag_material"
+          },
+          {
+            "type": "Physics"
+          }
+        ]
       },
       {
         "name": "windmill_base",
-        "position": [0, -42, -60],
+        "position": [0, 30, -60],
         "scale": [3.7, 3.7, 3.7],
         "components": [
           {
             "type": "Mesh Renderer",
             "mesh": "windmill_base",
-            "material": "border_wood_material"
+            "material": "windmill_base_wood"
           },
           {
             "type": "Physics"
+          }
+        ]
+      },
+      {
+        "name": "windmill_fan",
+        "position": [0, 10, -37],
+        "scale": [2, 2, 2],
+        "components": [
+          {
+            "type": "Mesh Renderer",
+            "mesh": "windmill_fan",
+            "material": "border_wood_material"
+          },
+          {
+            "type": "Movement",
+            "angularVelocity": [0, 0, 100],
+            "rotationAxis": "local"
+          // },
+          // {
+          //   "type": "Physics",
+          //   "group": "kinematic",
+          //   "mass": 20.0
           }
         ]
       },
@@ -283,19 +309,8 @@
         ]
       },
       {
-        "name": "windmill",
-        "position": [0, -42, -60],
-        "rotation": [0, 90, 0],
-        "scale": [3.7, 3.7, 3.7]
-      },
-      {
-        "name": "windmill_fan",
-        "position": [0, 20, -37],
-        "scale": [2, 2, 2]
-      },
-      {
         "name": "ball",
-        "position": [-230, 5, -106],
+        "position": [0, 5, 0],
         "scale": [1, 1, 1],
         "components": [
           {
