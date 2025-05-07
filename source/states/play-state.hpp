@@ -31,7 +31,7 @@ const float MIN_VELOCITY = 0.5f;
 const float MAX_VELOCITY = 300.0f;
 const float MAX_POWER = 300.0f;
 const int MAX_STROKES = 15;
-const int MAX_TIME = 90;
+const int MAX_TIME = 300;
 const int FELL_THRESHOLD = -17;
 const glm::vec3 CAMERA_OFFSET(0.0f, 5.0f, 10.0f);
 
@@ -212,6 +212,7 @@ class Playstate : public our::State {
         renderer.initialize(size, config["renderer"]);
         startTime = std::chrono::steady_clock::now();
 
+        renderer.set_fog_power(0.7f);
         // Initialize button material
         buttonMaterial = new our::TexturedMaterial();
         buttonMaterial->shader = new our::ShaderProgram();
@@ -258,7 +259,16 @@ class Playstate : public our::State {
         our::MovementComponent *golfMovementComponent = nullptr;
         our::Entity *arrow = nullptr;
         getNecessaryComponents(camera, golfBall, arrow);
-        std::cout << "y= " << golfBall->localTransform.position.y << "\n";
+
+        std::cout << "Position: (" << golfBall->localTransform.position.x << ", "
+                  << golfBall->localTransform.position.y << ", "
+                  << golfBall->localTransform.position.z << ")\n";
+        // Print the timer
+        // int remainingTime = MAX_TIME - elapsed;
+        // int minutes = remainingTime / 60;
+        // int seconds = remainingTime % 60;
+        // std::cout << "Time Remaining: " << minutes << ":" << (seconds < 10 ? "0" : "") << seconds
+        //           << "\n";
         bool fell = golfBall->localTransform.position.y < FELL_THRESHOLD ? true : false;
         updateState(elapsed, fell, golfBall);
         if (elapsed >= MAX_TIME || (strokesNum > MAX_STROKES && !won) || won || fell)

@@ -1,7 +1,7 @@
 {
   "start-scene": "menu",
   "window": {
-    "title": "Default Game Window",
+    "title": "The Golf Odyssey",
     "size": {
       "width": 1280,
       "height": 720
@@ -31,8 +31,9 @@
       "meshes": {
         "sphere": "assets/models/sphere.obj",
         "arrow": "assets/models/ArrowOBJ.obj",  
-        "map_grass": "assets/models/map_green.obj",
+        "map_grass": "assets/models/map_grass.obj",
         "map_border": "assets/models/map_border.obj",
+        "flag": "assets/models/flag.obj",
         "windmill_base": "assets/models/windmill_base.obj",
         "windmill_fan": "assets/models/windmill_fan.obj"
       },
@@ -138,6 +139,19 @@
           },
           "tint": [0.800007, 0.02092, 0.004197, 1.0]
         },
+        "flag_material": {
+          "type": "tinted",
+          "shader": "tinted",
+          "pipelineState": {
+            "faceCulling": {
+              "enabled": false
+            },
+            "depthTesting": {
+              "enabled": true
+            }
+          },
+          "tint": [0.4, 0.2, 0.8, 1.0]
+        },
         "arrow_material": {
           "type": "tinted",
           "shader": "tinted",
@@ -164,7 +178,8 @@
             "type": "Free Camera Controller"
           }
         ]
-      },{
+      },
+      {
         "name": "map_green",
         "position": [10, -10, -160],
         "scale": [1, 1, 1],
@@ -226,7 +241,7 @@
       },
       {
         "name": "ball",
-        "position": [-237, 5, -211],
+        "position": [-230, 5, -106],
         "scale": [1, 1, 1],
         "components": [
           {
@@ -256,12 +271,6 @@
             "material": "arrow_material"
           }
         ]
-      },
-      {
-        "name": "windmill",
-        "position": [-4, -6.9, 50],
-        "rotation": [0, 90, 0],
-        "scale": [1.2, 1.2, 1.2]
       }
     ]
   }
