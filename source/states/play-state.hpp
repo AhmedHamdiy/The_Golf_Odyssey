@@ -53,11 +53,12 @@ class Playstate : public our::State {
     bool won = false;
     int strokesNum = 0;
     glm::vec2 dragStart;
+    bool isMoving = false;
     std::chrono::steady_clock::time_point startTime;
     std::chrono::steady_clock::time_point currentTime;
+    int counter = 0;
 
-    void getNecessaryComponents(our::CameraComponent *&camera, our::Entity *&golfBall,
-                                our::Entity *&arrow) {
+    void getNecessaryComponents(our::CameraComponent *&camera, our::Entity *&golfBall, our::Entity *&arrow) {
         for (auto entity : world.getEntities()) {
             if (entity->name == "ball")
                 golfBall = entity;
@@ -69,7 +70,7 @@ class Playstate : public our::State {
     }
 
     void updateState(int time, bool fell, our::Entity *golfBall) {
-        if (time >= MAX_TIME || (strokesNum > MAX_STROKES && !won)) {
+        if (time >= MAX_TIME || (strokesNum >= MAX_STROKES && !won && !isMoving)) {
             return getApp()->changeState("lose");
         }
         if (won) {
@@ -194,6 +195,12 @@ class Playstate : public our::State {
     }
 
     void onInitialize() override {
+        ballDragging = false;
+        won = false;
+        strokesNum = 0;
+        isMoving = false;
+        counter = 0;
+
         // First of all, we get the scene configuration from the app config
         auto &config = getApp()->getConfig()["scene"];
         // If we have assets in the scene config, we deserialize them
@@ -257,13 +264,11 @@ class Playstate : public our::State {
         our::CameraComponent *camera = nullptr;
         our::MovementComponent *golfMovementComponent = nullptr;
         our::Entity *arrow = nullptr;
-        getNecessaryComponents(camera, golfBall, arrow);
-        std::cout << "y= " << golfBall->localTransform.position.y << "\n";
-        bool fell = golfBall->localTransform.position.y < FELL_THRESHOLD ? true : false;
+        getNecessaryComponents(camera,golfBall,arrow);
+        btRigidBody* body = physicsSystem.getRigidBodies()[golfBall];
+        bool fell = golfBall->localTransform.position.y < FELL_THRESHOLD ? true: false;
         updateState(elapsed, fell, golfBall);
-        if (elapsed >= MAX_TIME || (strokesNum > MAX_STROKES && !won) || won || fell)
-            return;
-
+        if(elapsed >= MAX_TIME || (strokesNum >= MAX_STROKES && !won && !isMoving) || won || fell) return;
         movementSystem.update(&world, (float)deltaTime, physicsSystem.getRigidBodies());
         if (!ballDragging)
             cameraController.update(&world, (float)deltaTime);
@@ -274,6 +279,8 @@ class Playstate : public our::State {
         // updateBallVelocity(deltaTime);
         physicsSystem.update(&world, (float)deltaTime);
 
+        if(body->getLinearVelocity().length() == 0.0f && ++counter > 5) {isMoving = false; counter = 0;}
+        else isMoving = true;
         // And finally we use the renderer system to draw the scene
         renderer.render(&world);
 
@@ -327,9 +334,8 @@ class Playstate : public our::State {
 
             if (golfBall)
                 golfMovementComponent = golfBall->getComponent<our::MovementComponent>();
-            if (glm::length(body->getLinearVelocity().length()) > MIN_VELOCITY)
-                return;
-            if (action == GLFW_PRESS) {
+            if(glm::length(body->getLinearVelocity().length()) > MIN_VELOCITY) return;
+            if(action == GLFW_PRESS){
                 glm::vec2 windowSize = renderer.windowSize;
                 glm::vec3 ballWorldPos = golfBall->localTransform.position;
                 glm::vec4 clipSpace = (camera->getProjectionMatrix(windowSize)) *
@@ -345,10 +351,11 @@ class Playstate : public our::State {
                 if (distance < MOUSE_TO_BALL_THRESHOLD) {
                     dragStart = ballPos;
                     ballDragging = true;
-                    strokesNum++;
+                    isMoving = true;
                 }
-            } else if (action == GLFW_RELEASE && ballDragging) {
-                arrow->localTransform.scale = glm::vec3(0, 0, 0);
+            }else if(action == GLFW_RELEASE && ballDragging){
+                strokesNum++;
+                arrow->localTransform.scale = glm::vec3(0,0,0);
 
                 ballDragging = false;
                 glm::vec2 dragEnd = getApp()->getMouse().getMousePosition();
